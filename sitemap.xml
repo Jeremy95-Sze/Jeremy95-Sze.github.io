@@ -3,11 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://jeremy95-sze.github.io/tags/about/</loc>
-    <lastmod>2018-06-29T11:43:30+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://jeremy95-sze.github.io/about/</loc>
     <lastmod>2018-06-29T11:43:30+08:00</lastmod>
   </url>
@@ -18,12 +13,12 @@
   </url>
   
   <url>
-    <loc>https://jeremy95-sze.github.io/tags/</loc>
+    <loc>https://jeremy95-sze.github.io/about/about/</loc>
     <lastmod>2018-06-29T11:43:30+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://jeremy95-sze.github.io/about/about/</loc>
+    <loc>https://jeremy95-sze.github.io/test/</loc>
     <lastmod>2018-06-29T11:43:30+08:00</lastmod>
   </url>
   
@@ -44,6 +39,11 @@
   
   <url>
     <loc>https://jeremy95-sze.github.io/post/</loc>
+    <lastmod>2018-01-08T08:36:54-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://jeremy95-sze.github.io/tags/</loc>
     <lastmod>2018-01-08T08:36:54-07:00</lastmod>
   </url>
   
