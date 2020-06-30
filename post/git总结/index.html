@@ -143,7 +143,17 @@
     <div class="post-toc-content">
         <nav id="TableOfContents">
   <ul>
+    <li><a href="#git介绍">git介绍</a></li>
+    <li><a href="#git与svn对比">Git与SVN对比</a></li>
     <li><a href="#svn基本概念">SVN基本概念</a></li>
+    <li><a href="#git基本概念">Git基本概念</a></li>
+    <li><a href="#svn与git区别">SVN与Git区别</a></li>
+    <li><a href="#git工作流程">Git工作流程</a></li>
+    <li><a href="#创建版本库">创建版本库</a></li>
+    <li><a href="#使用gitbash">使用GitBash</a></li>
+    <li><a href="#tortoisegit分支管理">TortoiseGit分支管理</a></li>
+    <li><a href="#项目加入忽略文件">项目加入忽略文件</a></li>
+    <li><a href="#删除git远程仓库中指定文件">删除git远程仓库中指定文件</a></li>
   </ul>
 </nav>
     </div>
@@ -198,7 +208,7 @@
         
         
         <div class="post-content">
-            <h1 id="git介绍">git介绍</h1>
+            <h2 id="git介绍">git介绍</h2>
 <p>  同生活中的许多伟大事件一样，Git 诞生于一个极富纷争大举创新的年代,Linux 内核开源项目有着为数众广的参与者。绝大多数的 Linux 内核维护工作都花在了提交补丁和保存归档的繁琐事务上（1991－2002年间）。<br>
   到 2002 年，Linux系统已经发展了十年了，代码库之大让Linus很难继续通过手工方式管理了，于是整个项目组开始启用分布式版本控制系统 BitKeeper 来管理和维护代码。
 到 2005 年的时候，开发 BitKeeper 的商业公司同 Linux 内核开源社区的合作关系结束，他们收回了免费使用 BitKeeper 的权力。这就迫使 Linux 开源社区（特别是 Linux的缔造者 Linus Torvalds林纳斯•托瓦兹）不得不吸取教训，只有开发一套属于自己的版本控制系统才不至于重蹈覆辙。<br>
@@ -210,10 +220,64 @@
 <li>完全分布式</li>
 <li>有能力高效管理类似 Linux 内核一样的超大规模项目（速度快和数据多）</li>
 </ol>
-<h1 id="git与svn对比">Git与SVN对比</h1>
+<h2 id="git与svn对比">Git与SVN对比</h2>
 <h2 id="svn基本概念">SVN基本概念</h2>
 <p>  SVN是集中式版本控制软件，版本库是集中放在中央服务器的，而干活的时候，用的都是自己的电脑，所以首先要从中央服务器哪里得到最新的版本，然后干活，干完后，需要把自己做完的活推送到中央服务器。集中式版本控制系统是必须联网才能工作，如果在局域网还可以，带宽够大，速度够快，如果在互联网下，如果网速慢的话，就郁闷了。
-<img src="/img/svn.png" alt="alt svn原理图"></p>
+<img src="/img/svn.png" alt="alt svn原理图">
+  集中管理方式在一定程度上看到其他开发人员在干什么。但是相较于其优点而言，集中式版本控制工具缺点很明显:<br>
+服务器单点故障(只有一台服务器)<br>
+  容错性差</p>
+<h2 id="git基本概念">Git基本概念</h2>
+<p>  Git是分布式版本控制软件，那么它可以没有中央服务器的，每个人的电脑就是一个完整的版本库，这样，工作的时候就不需要联网了，因为版本都是在自己的电脑上。既然每个人的电脑都有一个完整的版本库，那多个人如何协作呢？比如说自己在电脑上改了文件A，其他人也在电脑上改了文件A，这时，你们两之间只需把各自的修改推送给对方，就可以互相看到对方的修改了。克隆
+<img src="/img/git.png" alt="alt git克隆拉取提交"></p>
+<h2 id="svn与git区别">SVN与Git区别</h2>
+<ul>
+<li>Git有多个仓库(分布式)、SVN只有一个仓库(集中式)</li>
+<li>Git是仓库对仓库、SVN是项目对仓库</li>
+</ul>
+<h2 id="git工作流程">Git工作流程</h2>
+<p>工作流程如下：</p>
+<ul>
+<li>克隆Git远程仓库中作为本地仓库。</li>
+<li>把本地仓库中的项目导入开发工具，然后开发项目。</li>
+<li>在提交前先将代码提交到暂存区。</li>
+<li>提交修改，提交到本地仓库。</li>
+<li>需要和团队成员共享代码时，push本地仓库代码到Git远程仓库。<br>
+Git的工作流程图：
+<img src="/img/git1.png" alt="alt git工作流程图"></li>
+</ul>
+<h2 id="创建版本库">创建版本库</h2>
+<p>  什么是版本库呢？版本库又名仓库，英文名repository，你可以简单理解成一个目录，这个目录里面的所有文件都可以被Git管理起来，每个文件的修改、删除，Git都能跟踪，以便任何时刻都可以追踪历史，或者在将来某个时刻可以“还原”。由于git是分布式版本管理工具，所以git在不需要联网的情况下也具有完整的版本管理能力。
+创建一个版本库非常简单，可以使用git bash也可以使用tortoiseGit。首先，选择一个合适的地方，创建一个空目录（D:\git_repo）。</p>
+<h2 id="使用gitbash">使用GitBash</h2>
+<p>在当前目录中点击右键中选择Git Bash来启动。</p>
+<ul>
+<li>版本库：“.git”目录就是版本库，提交的文件都需要保存到版本库中。</li>
+<li>工作目录：包含“.git”目录的目录，也就是.git目录的上一级目录就是工作目录。只有工作目录中的文件才能保存到版本库中。</li>
+</ul>
+<h2 id="tortoisegit分支管理">TortoiseGit分支管理</h2>
+<p>  在我们每次的提交，Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD指针用来指向目前我们操作的master分支，master分支才是我们提交的。
+<img src="/img/%E5%88%86%E6%94%AF.png" alt="alt 分支"></p>
+<h2 id="项目加入忽略文件">项目加入忽略文件</h2>
+<p>如下图，加入检入时需要忽略的文件.gitignore
+<img src="/img/%E5%BF%BD%E7%95%A5.png" alt="alt 忽略">
+.gitignore文件内容如下：<br>
+.idea<br>
+target<br>
+*.iml<br>
+.classpath<br>
+.project<br>
+.settings<br>
+bin</p>
+<h2 id="删除git远程仓库中指定文件">删除git远程仓库中指定文件</h2>
+<p>删除远程仓库中的指定文件<br>
+git rm -r  文件名或文件夹名</p>
+<p>添加暂存区<br>
+git add .</p>
+<p>提交到本地仓库 <br>
+git commit -m &ldquo;删除&rdquo;</p>
+<p>上传得远程仓库<br>
+git push</p>
 
         </div>
 
