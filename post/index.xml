@@ -20,5 +20,14 @@
       <description>git介绍 同生活中的许多伟大事件一样，Git 诞生于一个极富纷争大举创新的年代,Linux 内核开源项目有着为数众广的参与者。绝大多数的 Linux 内核维护工作都花在了提交补丁和保存归档的繁琐事务上（1991－2002年间）。 到 2002 年，Linux系统已经发展了十年了，代码库之大让Linus很难继</description>
     </item>
     
+    <item>
+      <title>JPA总结</title>
+      <link>https://jeremy95-sze.github.io/post/JPA/</link>
+      <pubDate>Mon, 08 Jan 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/JPA/</guid>
+      <description>ORM概述及特点 概述 ORM（Object-Relational Mapping） 表示对象关系映射。在面向对象的软件开发中，通过ORM，就可以把对象映射到关系型数据库中。只要有一套程序能够做到建立对象与数据库的关联，操作对象就可以直接操作数据库数据，就可以说这套程序实现了ORM对象关</description>
+    </item>
+    
   </channel>
 </rss>
