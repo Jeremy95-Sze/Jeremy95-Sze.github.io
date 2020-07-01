@@ -38,6 +38,21 @@
   </url>
   
   <url>
+    <loc>https://jeremy95-sze.github.io/tags/JPA/</loc>
+    <lastmod>2018-10-02T08:36:54-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://jeremy95-sze.github.io/post/JPA/</loc>
+    <lastmod>2018-10-02T08:36:54-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/</loc>
+    <lastmod>2018-10-02T08:36:54-07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://jeremy95-sze.github.io/about/</loc>
     <lastmod>2018-06-29T11:43:30+08:00</lastmod>
   </url>
@@ -58,23 +73,11 @@
   </url>
   
   <url>
-    <loc>https://jeremy95-sze.github.io/tags/JPA/</loc>
-  </url>
-  
-  <url>
-    <loc>https://jeremy95-sze.github.io/post/JPA/</loc>
-  </url>
-  
-  <url>
     <loc>https://jeremy95-sze.github.io/archives/</loc>
   </url>
   
   <url>
     <loc>https://jeremy95-sze.github.io/search/</loc>
-  </url>
-  
-  <url>
-    <loc>https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/</loc>
   </url>
   
 </urlset>
