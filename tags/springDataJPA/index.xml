@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>springDataJPA on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/tags/springDataJPA/</link>
+    <description>Recent content in springDataJPA on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 21 Oct 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/tags/springDataJPA/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>springDataJPA总结</title>
+      <link>https://jeremy95-sze.github.io/post/springDataJPA%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sun, 21 Oct 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/springDataJPA%E6%80%BB%E7%BB%93/</guid>
+      <description>Spring Data JPA概述 Spring Data JPA 是 Spring 基于 ORM 框架、JPA 规范的基础上封装的一套JPA应用框架，可使开发者用极简的代码即可实现对数据库的访问和操作。它提供了包括增删改查等在内的常用功能，且易于扩展！学习并使用 Spring Data JPA 可以极大提高开发效率！ Spring Data JPA 让我们解脱了DAO层的操作，基本上所有CRUD都可以依</description>
+    </item>
+    
+  </channel>
+</rss>
