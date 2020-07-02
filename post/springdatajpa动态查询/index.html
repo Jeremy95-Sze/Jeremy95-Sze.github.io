@@ -1,0 +1,1868 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>springDataJPA_动态查询总结 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="springDataJPA_动态查询总结 - Jeremy Sze的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2018-10-22T08:36:54&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2018-10-22T08:36:54&#43;08:00'>
+        
+    <meta name="Keywords" content="java,博客">
+    <meta name="description" content="springDataJPA_动态查询总结">
+        
+    <meta name="author" content="Jeremy Sze">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-4031353640611810",
+        enable_page_level_ads: true
+    });
+    </script>
+    
+
+
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://jeremy95-sze.github.io/">
+                        Jeremy Sze的博客
+                    </a>
+                
+                <p class="description">专注于Java、JavaScript、软件开发、web开发、分布式，微服务系统开发</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://jeremy95-sze.github.io/">首页</a>
+                    
+                    <a  href="https://jeremy95-sze.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#specifications动态查询">Specifications动态查询</a>
+      <ul>
+        <li><a href="#使用specifications完成条件查询">使用Specifications完成条件查询</a></li>
+        <li><a href="#基于specifications的分页查询">基于Specifications的分页查询</a></li>
+        <li><a href="#方法对应关系">方法对应关系</a></li>
+      </ul>
+    </li>
+    <li><a href="#多表设计">多表设计</a>
+      <ul>
+        <li><a href="#表之间关系的划分">表之间关系的划分</a></li>
+      </ul>
+    </li>
+    <li><a href="#在jpa框架中表关系的分析步骤">在JPA框架中表关系的分析步骤</a>
+      <ul>
+        <li><a href="#第一步首先确定两张表之间的关系">第一步：首先确定两张表之间的关系。</a></li>
+        <li><a href="#第二步在数据库中实现两张表的关系">第二步：在数据库中实现两张表的关系</a></li>
+        <li><a href="#第三步在实体类中描述出两个实体的关系">第三步：在实体类中描述出两个实体的关系</a></li>
+        <li><a href="#第四步配置出实体类和数据库表的关系映射重点">第四步：配置出实体类和数据库表的关系映射（重点）</a></li>
+      </ul>
+    </li>
+    <li><a href="#删除">删除</a></li>
+    <li><a href="#级联操作">级联操作</a></li>
+    <li><a href="#多对多关联关系">多对多关联关系</a>
+      <ul>
+        <li><a href="#实体类关系建立以及映射配置">实体类关系建立以及映射配置</a></li>
+        <li><a href="#映射的注解说明-1">映射的注解说明</a></li>
+        <li><a href="#多对多保存test">多对多保存test</a></li>
+        <li><a href="#多对多删除">多对多删除</a></li>
+      </ul>
+    </li>
+    <li><a href="#对象导航查询">对象导航查询</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">springDataJPA_动态查询总结</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年10月22日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/spring'>spring</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="specifications动态查询">Specifications动态查询</h2>
+<p>  有时我们在查询某个实体的时候，给定的条件是不固定的，这时就需要动态构建相应的查询语句，在Spring Data JPA中可以通过JpaSpecificationExecutor接口查询。相比JPQL,其优势是类型安全,更加的面向对象。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Page</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Pageable</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Sort</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.domain.Specification</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> *	JpaSpecificationExecutor中定义的方法
+</span><span style="color:#998;font-style:italic"> **/</span>
+ <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">JpaSpecificationExecutor</span><span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+   	<span style="color:#998;font-style:italic">//根据条件查询一个对象
+</span><span style="color:#998;font-style:italic"></span> 	T <span style="color:#900;font-weight:bold">findOne</span><span style="color:#000;font-weight:bold">(</span>Specification<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> spec<span style="color:#000;font-weight:bold">);</span>	
+   	<span style="color:#998;font-style:italic">//根据条件查询集合
+</span><span style="color:#998;font-style:italic"></span> 	List<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findAll</span><span style="color:#000;font-weight:bold">(</span>Specification<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> spec<span style="color:#000;font-weight:bold">);</span>
+   	<span style="color:#998;font-style:italic">//根据条件分页查询
+</span><span style="color:#998;font-style:italic"></span> 	Page<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findAll</span><span style="color:#000;font-weight:bold">(</span>Specification<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> spec<span style="color:#000;font-weight:bold">,</span> Pageable pageable<span style="color:#000;font-weight:bold">);</span>
+   	<span style="color:#998;font-style:italic">//排序查询查询
+</span><span style="color:#998;font-style:italic"></span> 	List<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findAll</span><span style="color:#000;font-weight:bold">(</span>Specification<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> spec<span style="color:#000;font-weight:bold">,</span> Sort sort<span style="color:#000;font-weight:bold">);</span>
+   	<span style="color:#998;font-style:italic">//统计查询
+</span><span style="color:#998;font-style:italic"></span> 	<span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">count</span><span style="color:#000;font-weight:bold">(</span>Specification<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> spec<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>对于JpaSpecificationExecutor，这个接口基本是围绕着Specification接口来定义的。我们可以简单的理解为，Specification构造的就是查询条件。</p>
+<p>Specification接口中只定义了如下一个方法：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#998;font-style:italic">//构造查询条件
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">    *	root	：Root接口，代表查询的根对象，可以通过root获取实体中的属性
+</span><span style="color:#998;font-style:italic">    *	query	：代表一个顶层查询对象，用来自定义查询
+</span><span style="color:#998;font-style:italic">    *	cb		：用来构建查询，此对象里有很多条件方法
+</span><span style="color:#998;font-style:italic">    **/</span>
+    <span style="color:#000;font-weight:bold">public</span> Predicate <span style="color:#900;font-weight:bold">toPredicate</span><span style="color:#000;font-weight:bold">(</span>Root<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> root<span style="color:#000;font-weight:bold">,</span> CriteriaQuery<span style="color:#000;font-weight:bold">&lt;?&gt;</span> query<span style="color:#000;font-weight:bold">,</span> CriteriaBuilder cb<span style="color:#000;font-weight:bold">);</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="使用specifications完成条件查询">使用Specifications完成条件查询</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">//依赖注入customerDao
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+	<span style="color:#000;font-weight:bold">private</span> CustomerDao customerDao<span style="color:#000;font-weight:bold">;</span>	
+	<span style="color:#3c5d5d;font-weight:bold">@Test</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testSpecifications</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+      	<span style="color:#998;font-style:italic">//使用匿名内部类的方式，创建一个Specification的实现类，并实现toPredicate方法
+</span><span style="color:#998;font-style:italic"></span>		Specification <span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> spec <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;()</span> <span style="color:#000;font-weight:bold">{</span>
+			<span style="color:#000;font-weight:bold">public</span> Predicate <span style="color:#900;font-weight:bold">toPredicate</span><span style="color:#000;font-weight:bold">(</span>Root<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> root<span style="color:#000;font-weight:bold">,</span> CriteriaQuery<span style="color:#000;font-weight:bold">&lt;?&gt;</span> query<span style="color:#000;font-weight:bold">,</span> CriteriaBuilder cb<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+				<span style="color:#998;font-style:italic">//cb:构建查询，添加查询方式   like：模糊匹配
+</span><span style="color:#998;font-style:italic"></span>				<span style="color:#998;font-style:italic">//root：从实体Customer对象中按照custName属性进行查询
+</span><span style="color:#998;font-style:italic"></span>				<span style="color:#000;font-weight:bold">return</span> cb<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">like</span><span style="color:#000;font-weight:bold">(</span>root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custName&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">as</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#d14">&#34;纯情%&#34;</span><span style="color:#000;font-weight:bold">);</span>
+			<span style="color:#000;font-weight:bold">}</span>
+		<span style="color:#000;font-weight:bold">};</span>
+		Customer customer <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findOne</span><span style="color:#000;font-weight:bold">(</span>spec<span style="color:#000;font-weight:bold">);</span>
+		System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="基于specifications的分页查询">基于Specifications的分页查询</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testPage</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#998;font-style:italic">//构造查询条件
+</span><span style="color:#998;font-style:italic"></span>		Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> spec <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;()</span> <span style="color:#000;font-weight:bold">{</span>
+			<span style="color:#000;font-weight:bold">public</span> Predicate <span style="color:#900;font-weight:bold">toPredicate</span><span style="color:#000;font-weight:bold">(</span>Root<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> root<span style="color:#000;font-weight:bold">,</span> CriteriaQuery<span style="color:#000;font-weight:bold">&lt;?&gt;</span> query<span style="color:#000;font-weight:bold">,</span> CriteriaBuilder cb<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+				<span style="color:#000;font-weight:bold">return</span> cb<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">like</span><span style="color:#000;font-weight:bold">(</span>root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custName&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">as</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#d14">&#34;纯情%&#34;</span><span style="color:#000;font-weight:bold">);</span>
+			<span style="color:#000;font-weight:bold">}</span>
+		<span style="color:#000;font-weight:bold">};</span>
+		
+		<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">		 * 构造分页参数
+</span><span style="color:#998;font-style:italic">		 * 		Pageable : 接口
+</span><span style="color:#998;font-style:italic">		 * 			PageRequest实现了Pageable接口，调用构造方法的形式构造
+</span><span style="color:#998;font-style:italic">		 * 				第一个参数：页码（从0开始）
+</span><span style="color:#998;font-style:italic">		 * 				第二个参数：每页查询条数
+</span><span style="color:#998;font-style:italic">		 */</span>
+		Pageable pageable <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> PageRequest<span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">);</span>
+		
+		<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">		 * 分页查询，封装为Spring Data Jpa 内部的page bean
+</span><span style="color:#998;font-style:italic">		 * 		此重载的findAll方法为分页方法需要两个参数
+</span><span style="color:#998;font-style:italic">		 * 			第一个参数：查询条件Specification
+</span><span style="color:#998;font-style:italic">		 * 			第二个参数：分页参数
+</span><span style="color:#998;font-style:italic">		 */</span>
+		Page<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> page <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findAll</span><span style="color:#000;font-weight:bold">(</span>spec<span style="color:#000;font-weight:bold">,</span>pageable<span style="color:#000;font-weight:bold">);</span>
+		
+	<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>对于Spring Data JPA中的分页查询，是其内部自动实现的封装过程，返回的是一个Spring Data JPA提供的pageBean对象。其中的方法说明如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	 <span style="color:#998;font-style:italic">//获取总页数
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">getTotalPages</span><span style="color:#000;font-weight:bold">();</span>
+	 <span style="color:#998;font-style:italic">//获取总记录数	
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">getTotalElements</span><span style="color:#000;font-weight:bold">();</span>
+	<span style="color:#998;font-style:italic">//获取列表数据
+</span><span style="color:#998;font-style:italic"></span>	List<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getContent</span><span style="color:#000;font-weight:bold">();</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="方法对应关系">方法对应关系</h3>
+<p><img src="/img/jpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2%E6%96%B9%E6%B3%95%E5%8F%82%E6%95%B0.png" alt="alt jpa动态查询方法参数"></p>
+<h2 id="多表设计">多表设计</h2>
+<h3 id="表之间关系的划分">表之间关系的划分</h3>
+<p>数据库中多表之间存在着三种关系，如图所示
+<img src="/img/%E8%A1%A8%E5%85%B3%E7%B3%BB%E5%9B%BE.png" alt="alt 表关系图">
+从图可以看出，系统设计的三种实体关系分别为：多对多、一对多和一对一关系。$\color{red}{注意：一对多关系可以看为两种：  即一对多，多对一。所以说四种更精确。}$</p>
+<p>明确：	我们今天只涉及实际开发中常用的关联关系，一对多和多对多。而一对一的情况，在实际开发中几乎不用。</p>
+<h2 id="在jpa框架中表关系的分析步骤">在JPA框架中表关系的分析步骤</h2>
+<p>  在实际开发中，我们数据库的表难免会有相互的关联关系，在操作表的时候就有可能会涉及到多张表的操作。而在这种实现了ORM思想的框架中（如JPA），可以让我们通过操作实体类就实现对数据库表的操作。所以今天我们的学习重点是：掌握配置实体之间的关联关系。</p>
+<h3 id="第一步首先确定两张表之间的关系">第一步：首先确定两张表之间的关系。</h3>
+<p>如果关系确定错了，后面做的所有操作就都不可能正确。</p>
+<p>示例分析</p>
+<p>我们采用的示例为客户和联系人。</p>
+<p>客户：指的是一家公司，我们记为A。</p>
+<p>联系人：指的是A公司中的员工。</p>
+<p>在不考虑兼职的情况下，公司和员工的关系即为一对多</p>
+<h3 id="第二步在数据库中实现两张表的关系">第二步：在数据库中实现两张表的关系</h3>
+<p>表关系建立</p>
+<p>在一对多关系中，我们习惯把一的一方称之为主表，把多的一方称之为从表。在数据库中建立一对多的关系，需要使用数据库的外键约束。</p>
+<p>什么是外键？<br>
+指的是从表中有一列，取值参照主表的主键，这一列就是外键。</p>
+<p>一对多数据库关系的建立，如下图所示 
+<img src="/img/%E8%A1%A8%E5%85%B3%E8%81%94%E5%85%B3%E7%B3%BB.png" alt="alt 表关联关系"></p>
+<h3 id="第三步在实体类中描述出两个实体的关系">第三步：在实体类中描述出两个实体的关系</h3>
+<p>在实体类中，由于客户是少的一方，它应该包含多个联系人，所以实体类要体现出客户中有多个联系人的信息，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 客户的实体类
+</span><span style="color:#998;font-style:italic"> * 明确使用的注解都是JPA规范的
+</span><span style="color:#998;font-style:italic"> * 所以导包都要导入javax.persistence包下的
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Entity</span><span style="color:#998;font-style:italic">//表示当前类是一个实体类
+</span><span style="color:#998;font-style:italic"></span><span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cst_customer&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//建立当前实体类和表之间的对应关系
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Customer</span> <span style="color:#000;font-weight:bold">implements</span> Serializable <span style="color:#000;font-weight:bold">{</span>
+	
+	<span style="color:#3c5d5d;font-weight:bold">@Id</span><span style="color:#998;font-style:italic">//表明当前私有属性是主键
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@GeneratedValue</span><span style="color:#000;font-weight:bold">(</span>strategy<span style="color:#000;font-weight:bold">=</span>GenerationType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">IDENTITY</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定主键的生成策略
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_id&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定和数据库表中的cust_id列对应
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> Long custId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_name&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定和数据库表中的cust_name列对应
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String custName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_source&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定和数据库表中的cust_source列对应
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String custSource<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_industry&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定和数据库表中的cust_industry列对应
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String custIndustry<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_level&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定和数据库表中的cust_level列对应
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String custLevel<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_address&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定和数据库表中的cust_address列对应
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String custAddress<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_phone&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//指定和数据库表中的cust_phone列对应
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String custPhone<span style="color:#000;font-weight:bold">;</span>
+	
+    <span style="color:#998;font-style:italic">//配置客户和联系人的一对多关系
+</span><span style="color:#998;font-style:italic"></span>  	<span style="color:#3c5d5d;font-weight:bold">@OneToMany</span><span style="color:#000;font-weight:bold">(</span>targetEntity<span style="color:#000;font-weight:bold">=</span>LinkMan<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#3c5d5d;font-weight:bold">@JoinColumn</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_cust_id&#34;</span><span style="color:#000;font-weight:bold">,</span>referencedColumnName<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Set<span style="color:#000;font-weight:bold">&lt;</span>LinkMan<span style="color:#000;font-weight:bold">&gt;</span> linkmans <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashSet<span style="color:#000;font-weight:bold">&lt;</span>LinkMan<span style="color:#000;font-weight:bold">&gt;(</span>0<span style="color:#000;font-weight:bold">);</span>
+	
+	<span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getCustId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> custId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustId</span><span style="color:#000;font-weight:bold">(</span>Long custId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custId</span> <span style="color:#000;font-weight:bold">=</span> custId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> custName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustName</span><span style="color:#000;font-weight:bold">(</span>String custName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custName</span> <span style="color:#000;font-weight:bold">=</span> custName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustSource</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> custSource<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustSource</span><span style="color:#000;font-weight:bold">(</span>String custSource<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custSource</span> <span style="color:#000;font-weight:bold">=</span> custSource<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustIndustry</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> custIndustry<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustIndustry</span><span style="color:#000;font-weight:bold">(</span>String custIndustry<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custIndustry</span> <span style="color:#000;font-weight:bold">=</span> custIndustry<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustLevel</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> custLevel<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustLevel</span><span style="color:#000;font-weight:bold">(</span>String custLevel<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custLevel</span> <span style="color:#000;font-weight:bold">=</span> custLevel<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustAddress</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> custAddress<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustAddress</span><span style="color:#000;font-weight:bold">(</span>String custAddress<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custAddress</span> <span style="color:#000;font-weight:bold">=</span> custAddress<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustPhone</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> custPhone<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustPhone</span><span style="color:#000;font-weight:bold">(</span>String custPhone<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custPhone</span> <span style="color:#000;font-weight:bold">=</span> custPhone<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> Set<span style="color:#000;font-weight:bold">&lt;</span>LinkMan<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getLinkmans</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> linkmans<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLinkmans</span><span style="color:#000;font-weight:bold">(</span>Set<span style="color:#000;font-weight:bold">&lt;</span>LinkMan<span style="color:#000;font-weight:bold">&gt;</span> linkmans<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">linkmans</span> <span style="color:#000;font-weight:bold">=</span> linkmans<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Override</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;Customer [custId=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custId <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, custName=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, custSource=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custSource
+				<span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, custIndustry=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custIndustry <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, custLevel=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custLevel <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, custAddress=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custAddress
+				<span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, custPhone=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custPhone <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;]&#34;</span><span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>由于联系人是多的一方，在实体类中要体现出，每个联系人只能对应一个客户，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">91
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">92
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 联系人的实体类（数据模型）
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Entity</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cst_linkman&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">LinkMan</span> <span style="color:#000;font-weight:bold">implements</span> Serializable <span style="color:#000;font-weight:bold">{</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Id</span>
+	<span style="color:#3c5d5d;font-weight:bold">@GeneratedValue</span><span style="color:#000;font-weight:bold">(</span>strategy<span style="color:#000;font-weight:bold">=</span>GenerationType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">IDENTITY</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Long lkmId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String lkmName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_gender&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String lkmGender<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_phone&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String lkmPhone<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_mobile&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String lkmMobile<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_email&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String lkmEmail<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_position&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String lkmPosition<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_memo&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String lkmMemo<span style="color:#000;font-weight:bold">;</span>
+
+	<span style="color:#998;font-style:italic">//多对一关系映射：多个联系人对应客户
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@ManyToOne</span><span style="color:#000;font-weight:bold">(</span>targetEntity<span style="color:#000;font-weight:bold">=</span>Customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#3c5d5d;font-weight:bold">@JoinColumn</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;lkm_cust_id&#34;</span><span style="color:#000;font-weight:bold">,</span>referencedColumnName<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Customer customer<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//用它的主键，对应联系人表中的外键
+</span><span style="color:#998;font-style:italic"></span>	
+	<span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getLkmId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmId</span><span style="color:#000;font-weight:bold">(</span>Long lkmId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmId</span> <span style="color:#000;font-weight:bold">=</span> lkmId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmName</span><span style="color:#000;font-weight:bold">(</span>String lkmName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmName</span> <span style="color:#000;font-weight:bold">=</span> lkmName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmGender</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmGender<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmGender</span><span style="color:#000;font-weight:bold">(</span>String lkmGender<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmGender</span> <span style="color:#000;font-weight:bold">=</span> lkmGender<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmPhone</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmPhone<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmPhone</span><span style="color:#000;font-weight:bold">(</span>String lkmPhone<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmPhone</span> <span style="color:#000;font-weight:bold">=</span> lkmPhone<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmMobile</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmMobile<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmMobile</span><span style="color:#000;font-weight:bold">(</span>String lkmMobile<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmMobile</span> <span style="color:#000;font-weight:bold">=</span> lkmMobile<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmEmail</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmEmail<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmEmail</span><span style="color:#000;font-weight:bold">(</span>String lkmEmail<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmEmail</span> <span style="color:#000;font-weight:bold">=</span> lkmEmail<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmPosition</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmPosition<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmPosition</span><span style="color:#000;font-weight:bold">(</span>String lkmPosition<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmPosition</span> <span style="color:#000;font-weight:bold">=</span> lkmPosition<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmMemo</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> lkmMemo<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmMemo</span><span style="color:#000;font-weight:bold">(</span>String lkmMemo<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmMemo</span> <span style="color:#000;font-weight:bold">=</span> lkmMemo<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>	
+	<span style="color:#000;font-weight:bold">public</span> Customer <span style="color:#900;font-weight:bold">getCustomer</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> customer<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustomer</span><span style="color:#000;font-weight:bold">(</span>Customer customer<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">customer</span> <span style="color:#000;font-weight:bold">=</span> customer<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Override</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;LinkMan [lkmId=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmId <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, lkmName=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, lkmGender=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmGender <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, lkmPhone=&#34;</span>
+				<span style="color:#000;font-weight:bold">+</span> lkmPhone <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, lkmMobile=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmMobile <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, lkmEmail=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmEmail <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, lkmPosition=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmPosition
+				<span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, lkmMemo=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmMemo <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;]&#34;</span><span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="第四步配置出实体类和数据库表的关系映射重点">第四步：配置出实体类和数据库表的关系映射（重点）</h3>
+<h4 id="映射的注解说明">映射的注解说明</h4>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">@OneToMany:
+   	作用：建立一对多的关系映射
+    属性：
+    	targetEntityClass：指定多的多方的类的字节码
+    	mappedBy：指定从表实体类中引用主表对象的名称。
+    	cascade：指定要使用的级联操作
+    	fetch：指定是否采用延迟加载
+    	orphanRemoval：是否使用孤儿删除
+
+@ManyToOne
+    作用：建立多对一的关系
+    属性：
+    	targetEntityClass：指定一的一方实体类字节码
+    	cascade：指定要使用的级联操作
+    	fetch：指定是否采用延迟加载
+    	optional：关联是否可选。如果设置为false，则必须始终存在非空关系。
+
+@JoinColumn
+     作用：用于定义主键字段和外键字段的对应关系。
+     属性：
+    	name：指定外键字段的名称
+    	referencedColumnName：指定引用主表的主键字段名称
+    	unique：是否唯一。默认值不唯一
+    	nullable：是否允许为空。默认值允许。
+    	insertable：是否允许插入。默认值允许。
+    	updatable：是否允许更新。默认值允许。
+    	columnDefinition：列的定义信息。
+
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="测试">测试</h4>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> CustomerDao customerDao<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> LinkManDao linkManDao<span style="color:#000;font-weight:bold">;</span>
+
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 添加数据
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Rollback</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">addCustomerAndLinkMan</span><span style="color:#000;font-weight:bold">(){</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Customer<span style="color:#000;font-weight:bold">();</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;黄思聪&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustAddress</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;汕尾市&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustPhone</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;10086&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustLevel</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;王者&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustSource</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;线下&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustIndustry</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;游戏手&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+        LinkMan linkMan <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> LinkMan<span style="color:#000;font-weight:bold">();</span>
+        linkMan<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setLkmName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;jeremy&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        linkMan<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setLkmEmail</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;yongyushi@126.com&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        linkMan<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setLkmMobile</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;17328605215&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        linkMan<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setLkmPosition</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;游戏手&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLinkManSet</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>linkMan<span style="color:#000;font-weight:bold">);</span>
+        linkMan<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustomer</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+
+        customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">save</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+        linkManDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">save</span><span style="color:#000;font-weight:bold">(</span>linkMan<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>通过保存的案例，我们可以发现在设置了双向关系之后，会发送两条insert语句，一条多余的update语句，那我们的解决是思路很简单，就是一的一方放弃维护权
+<img src="/img/%E7%BC%96%E8%AF%91sql.png" alt="alt 编译sql"></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">	 *放弃外键维护权的配置将如下配置改为
+</span><span style="color:#998;font-style:italic">	 */</span>
+    <span style="color:#998;font-style:italic">//@OneToMany(targetEntity=LinkMan.class)
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#998;font-style:italic">//@JoinColumn(name=&#34;lkm_cust_id&#34;,referencedColumnName=&#34;cust_id&#34;)	
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#998;font-style:italic">//设置为
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@OneToMany</span><span style="color:#000;font-weight:bold">(</span>mappedBy<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;customer&#34;</span><span style="color:#000;font-weight:bold">)</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>放弃维权之后
+<img src="/img/%E7%BC%96%E8%AF%91sql1.png" alt="alt 编译sql1"></p>
+<h2 id="删除">删除</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-JAVA" data-lang="JAVA"><span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+	<span style="color:#000;font-weight:bold">private</span> CustomerDao customerDao<span style="color:#000;font-weight:bold">;</span>
+	
+	<span style="color:#3c5d5d;font-weight:bold">@Test</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Rollback</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//设置为不回滚
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testDelete</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">delete</span><span style="color:#000;font-weight:bold">(</span>1l<span style="color:#000;font-weight:bold">);</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">删除操作的说明如下：
+
+删除从表数据：可以随时任意删除。
+
+删除主表数据：
+
+	有从表数据
+  1、在默认情况下，它会把外键字段置为null，然后删除主表数据。如果在数据库的表                结构上，外键字段有非空约束，默认情况就会报错了。
+  2、如果配置了放弃维护关联关系的权利，则不能删除（与外键字段是否允许为null，		没有关系）因为在删除时，它根本不会去更新从表的外键字段了。
+  3、如果还想删除，使用级联删除引用
+
+	没有从表数据引用：随便删
+
+在实际开发中，级联删除请慎用！(在一对多的情况下)
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="级联操作">级联操作</h2>
+<p>级联操作：指操作一个对象同时操作它的关联对象</p>
+<p>$\color{red}{使用方法：只需要在操作主体的注解上配置cascade}$</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">	 * cascade:配置级联操作
+</span><span style="color:#998;font-style:italic">	 * 		CascadeType.MERGE	级联更新
+</span><span style="color:#998;font-style:italic">	 * 		CascadeType.PERSIST	级联保存：
+</span><span style="color:#998;font-style:italic">	 * 		CascadeType.REFRESH 级联刷新：
+</span><span style="color:#998;font-style:italic">	 * 		CascadeType.REMOVE	级联删除：
+</span><span style="color:#998;font-style:italic">	 * 		CascadeType.ALL		包含所有
+</span><span style="color:#998;font-style:italic">	 */</span>
+	<span style="color:#3c5d5d;font-weight:bold">@OneToMany</span><span style="color:#000;font-weight:bold">(</span>mappedBy<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;customer&#34;</span><span style="color:#000;font-weight:bold">,</span>cascade<span style="color:#000;font-weight:bold">=</span>CascadeType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ALL</span><span style="color:#000;font-weight:bold">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><img src="/img/%E7%BA%A7%E8%81%94%E5%88%A0%E9%99%A4.png" alt="alt 级联删除"></p>
+<h2 id="多对多关联关系">多对多关联关系</h2>
+<p>例如<br>
+用户与角色的关系<br>
+<img src="/img/%E5%A4%9A%E5%AF%B9%E5%A4%9A%E5%85%B3%E8%81%94%E5%85%B3%E7%B3%BB.png" alt="alt 多对多关联关系"></p>
+<h3 id="实体类关系建立以及映射配置">实体类关系建立以及映射配置</h3>
+<p>一个用户可以具有多个角色，所以在用户实体类中应该包含多个角色的信息，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 用户的数据模型
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Entity</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;sys_user&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SysUser</span> <span style="color:#000;font-weight:bold">implements</span> Serializable <span style="color:#000;font-weight:bold">{</span>
+	
+	<span style="color:#3c5d5d;font-weight:bold">@Id</span>
+	<span style="color:#3c5d5d;font-weight:bold">@GeneratedValue</span><span style="color:#000;font-weight:bold">(</span>strategy<span style="color:#000;font-weight:bold">=</span>GenerationType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">IDENTITY</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Long userId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_code&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String userCode<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String userName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_password&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String userPassword<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_state&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String userState<span style="color:#000;font-weight:bold">;</span>
+	
+	<span style="color:#998;font-style:italic">//多对多关系映射
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@ManyToMany</span><span style="color:#000;font-weight:bold">(</span>mappedBy<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;users&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Set<span style="color:#000;font-weight:bold">&lt;</span>SysRole<span style="color:#000;font-weight:bold">&gt;</span> roles <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashSet<span style="color:#000;font-weight:bold">&lt;</span>SysRole<span style="color:#000;font-weight:bold">&gt;(</span>0<span style="color:#000;font-weight:bold">);</span>
+	
+	<span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getUserId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> userId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserId</span><span style="color:#000;font-weight:bold">(</span>Long userId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userId</span> <span style="color:#000;font-weight:bold">=</span> userId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getUserCode</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> userCode<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserCode</span><span style="color:#000;font-weight:bold">(</span>String userCode<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userCode</span> <span style="color:#000;font-weight:bold">=</span> userCode<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getUserName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> userName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserName</span><span style="color:#000;font-weight:bold">(</span>String userName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userName</span> <span style="color:#000;font-weight:bold">=</span> userName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getUserPassword</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> userPassword<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserPassword</span><span style="color:#000;font-weight:bold">(</span>String userPassword<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userPassword</span> <span style="color:#000;font-weight:bold">=</span> userPassword<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getUserState</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> userState<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserState</span><span style="color:#000;font-weight:bold">(</span>String userState<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userState</span> <span style="color:#000;font-weight:bold">=</span> userState<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> Set<span style="color:#000;font-weight:bold">&lt;</span>SysRole<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getRoles</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> roles<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setRoles</span><span style="color:#000;font-weight:bold">(</span>Set<span style="color:#000;font-weight:bold">&lt;</span>SysRole<span style="color:#000;font-weight:bold">&gt;</span> roles<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roles</span> <span style="color:#000;font-weight:bold">=</span> roles<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Override</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;SysUser [userId=&#34;</span> <span style="color:#000;font-weight:bold">+</span> userId <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, userCode=&#34;</span> <span style="color:#000;font-weight:bold">+</span> userCode <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, userName=&#34;</span> <span style="color:#000;font-weight:bold">+</span> userName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, userPassword=&#34;</span>
+				<span style="color:#000;font-weight:bold">+</span> userPassword <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, userState=&#34;</span> <span style="color:#000;font-weight:bold">+</span> userState <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;]&#34;</span><span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+
+</code></pre></td></tr></table>
+</div>
+</div><p>一个角色可以赋予多个用户，所以在角色实体类中应该包含多个用户的信息，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 角色的数据模型
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Entity</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;sys_role&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SysRole</span> <span style="color:#000;font-weight:bold">implements</span> Serializable <span style="color:#000;font-weight:bold">{</span>
+	
+	<span style="color:#3c5d5d;font-weight:bold">@Id</span>
+	<span style="color:#3c5d5d;font-weight:bold">@GeneratedValue</span><span style="color:#000;font-weight:bold">(</span>strategy<span style="color:#000;font-weight:bold">=</span>GenerationType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">IDENTITY</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;role_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Long roleId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;role_name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String roleName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;role_memo&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> String roleMemo<span style="color:#000;font-weight:bold">;</span>
+	
+	<span style="color:#998;font-style:italic">//多对多关系映射
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@ManyToMany</span>
+	<span style="color:#3c5d5d;font-weight:bold">@JoinTable</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_role_rel&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#998;font-style:italic">//中间表的名称
+</span><span style="color:#998;font-style:italic"></span>			  <span style="color:#998;font-style:italic">//中间表user_role_rel字段关联sys_role表的主键字段role_id
+</span><span style="color:#998;font-style:italic"></span>			  joinColumns<span style="color:#000;font-weight:bold">={</span><span style="color:#3c5d5d;font-weight:bold">@JoinColumn</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;role_id&#34;</span><span style="color:#000;font-weight:bold">,</span>referencedColumnName<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;role_id&#34;</span><span style="color:#000;font-weight:bold">)},</span>
+			  <span style="color:#998;font-style:italic">//中间表user_role_rel的字段关联sys_user表的主键user_id
+</span><span style="color:#998;font-style:italic"></span>			  inverseJoinColumns<span style="color:#000;font-weight:bold">={</span><span style="color:#3c5d5d;font-weight:bold">@JoinColumn</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_id&#34;</span><span style="color:#000;font-weight:bold">,</span>referencedColumnName<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;user_id&#34;</span><span style="color:#000;font-weight:bold">)}</span>
+	<span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Set<span style="color:#000;font-weight:bold">&lt;</span>SysUser<span style="color:#000;font-weight:bold">&gt;</span> users <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashSet<span style="color:#000;font-weight:bold">&lt;</span>SysUser<span style="color:#000;font-weight:bold">&gt;(</span>0<span style="color:#000;font-weight:bold">);</span>
+	
+	
+	<span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getRoleId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> roleId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setRoleId</span><span style="color:#000;font-weight:bold">(</span>Long roleId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roleId</span> <span style="color:#000;font-weight:bold">=</span> roleId<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getRoleName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> roleName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setRoleName</span><span style="color:#000;font-weight:bold">(</span>String roleName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roleName</span> <span style="color:#000;font-weight:bold">=</span> roleName<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getRoleMemo</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> roleMemo<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setRoleMemo</span><span style="color:#000;font-weight:bold">(</span>String roleMemo<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roleMemo</span> <span style="color:#000;font-weight:bold">=</span> roleMemo<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> Set<span style="color:#000;font-weight:bold">&lt;</span>SysUser<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getUsers</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> users<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUsers</span><span style="color:#000;font-weight:bold">(</span>Set<span style="color:#000;font-weight:bold">&lt;</span>SysUser<span style="color:#000;font-weight:bold">&gt;</span> users<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">users</span> <span style="color:#000;font-weight:bold">=</span> users<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Override</span>
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;SysRole [roleId=&#34;</span> <span style="color:#000;font-weight:bold">+</span> roleId <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, roleName=&#34;</span> <span style="color:#000;font-weight:bold">+</span> roleName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;, roleMemo=&#34;</span> <span style="color:#000;font-weight:bold">+</span> roleMemo <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;]&#34;</span><span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="映射的注解说明-1">映射的注解说明</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">@ManyToMany
+	作用：用于映射多对多关系
+	属性：
+		cascade：配置级联操作。
+		fetch：配置是否采用延迟加载。
+    	targetEntity：配置目标的实体类。映射多对多的时候不用写。
+
+@JoinTable
+    作用：针对中间表的配置
+    属性：
+    	nam：配置中间表的名称
+    	joinColumns：中间表的外键字段关联当前实体类所对应表的主键字段			  			
+    	inverseJoinColumn：中间表的外键字段关联对方表的主键字段
+    	
+@JoinColumn
+    作用：用于定义主键字段和外键字段的对应关系。
+    属性：
+    	name：指定外键字段的名称
+    	referencedColumnName：指定引用主表的主键字段名称
+    	unique：是否唯一。默认值不唯一
+    	nullable：是否允许为空。默认值允许。
+    	insertable：是否允许插入。默认值允许。
+    	updatable：是否允许更新。默认值允许。
+    	columnDefinition：列的定义信息。
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="多对多保存test">多对多保存test</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#998;font-style:italic">/**&#39;
+</span><span style="color:#998;font-style:italic">     * 测试多对多保存
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Rollback</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">userAndRole</span><span style="color:#000;font-weight:bold">(){</span>
+
+       SysRole sysRole <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> SysRole<span style="color:#000;font-weight:bold">();</span>
+        sysRole<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setRoleName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;黄思聪&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        SysUser sysUser <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> SysUser<span style="color:#000;font-weight:bold">();</span>
+        sysUser<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setUserName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Jeremy&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+        sysUser<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRoleSet</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>sysRole<span style="color:#000;font-weight:bold">);</span>
+        sysRole<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getUserSet</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>sysUser<span style="color:#000;font-weight:bold">);</span>
+
+        sysUserDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">save</span><span style="color:#000;font-weight:bold">(</span>sysUser<span style="color:#000;font-weight:bold">);</span>
+        sysRoleDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">save</span><span style="color:#000;font-weight:bold">(</span>sysRole<span style="color:#000;font-weight:bold">);</span>
+
+       <span style="color:#998;font-style:italic">// System.out.println(&#34;test&#34;);
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在多对多（保存）中，如果双向都设置关系，意味着双方都维护中间表，都会往中间表插入数据，中间表的2个字段又作为联合主键，所以报错，主键重复，解决保存失败的问题：只需要在任意一方放弃对中间表的维护权即可，推荐在被动的一方放弃，配置如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">//放弃对中间表的维护权，解决保存中主键冲突的问题
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@ManyToMany</span><span style="color:#000;font-weight:bold">(</span>mappedBy<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;roles&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Set<span style="color:#000;font-weight:bold">&lt;</span>SysUser<span style="color:#000;font-weight:bold">&gt;</span> users <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashSet<span style="color:#000;font-weight:bold">&lt;</span>SysUser<span style="color:#000;font-weight:bold">&gt;(</span>0<span style="color:#000;font-weight:bold">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="多对多删除">多对多删除</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+	<span style="color:#000;font-weight:bold">private</span> UserDao userDao<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">	 * 删除操作
+</span><span style="color:#998;font-style:italic">	 * 	在多对多的删除时，双向级联删除根本不能配置
+</span><span style="color:#998;font-style:italic">	 * 禁用
+</span><span style="color:#998;font-style:italic">	 *	如果配了的话，如果数据之间有相互引用关系，可能会清空所有数据
+</span><span style="color:#998;font-style:italic">	 */</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Test</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+	<span style="color:#3c5d5d;font-weight:bold">@Rollback</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//设置为不回滚
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testDelete</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		userDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">delete</span><span style="color:#000;font-weight:bold">(</span>1l<span style="color:#000;font-weight:bold">);</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="对象导航查询">对象导航查询</h2>
+<p>对象图导航检索方式是根据已经加载的对象，导航到他的关联对象。它利用类与类之间的关系来检索对象。例如：我们通过ID查询方式查出一个客户，可以调用Customer类中的getLinkMans()方法来获取该客户的所有联系人。对象导航查询的使用要求是：两个对象之间必须存在关联关系。</p>
+<p>查询一个客户，获取该客户下的所有联系人</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+	<span style="color:#000;font-weight:bold">private</span> CustomerDao customerDao<span style="color:#000;font-weight:bold">;</span>
+	
+	<span style="color:#3c5d5d;font-weight:bold">@Test</span>
+	<span style="color:#998;font-style:italic">//由于是在java代码中测试，为了解决no session问题，将操作配置到同一个事务中
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#3c5d5d;font-weight:bold">@Transactional</span> 
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFind</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		Customer customer <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findOne</span><span style="color:#000;font-weight:bold">(</span>5l<span style="color:#000;font-weight:bold">);</span>
+		Set<span style="color:#000;font-weight:bold">&lt;</span>LinkMan<span style="color:#000;font-weight:bold">&gt;</span> linkMans <span style="color:#000;font-weight:bold">=</span> customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLinkMans</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//对象导航查询
+</span><span style="color:#998;font-style:italic"></span>		<span style="color:#000;font-weight:bold">for</span><span style="color:#000;font-weight:bold">(</span>LinkMan linkMan <span style="color:#000;font-weight:bold">:</span> linkMans<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+  			System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>linkMan<span style="color:#000;font-weight:bold">);</span>
+		<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>查询一个联系人，获取该联系人的所有客户</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+	<span style="color:#000;font-weight:bold">private</span> LinkManDao linkManDao<span style="color:#000;font-weight:bold">;</span>
+	
+	
+	<span style="color:#3c5d5d;font-weight:bold">@Test</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFind</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		LinkMan linkMan <span style="color:#000;font-weight:bold">=</span> linkManDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findOne</span><span style="color:#000;font-weight:bold">(</span>4l<span style="color:#000;font-weight:bold">);</span>
+		Customer customer <span style="color:#000;font-weight:bold">=</span> linkMan<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCustomer</span><span style="color:#000;font-weight:bold">();</span> <span style="color:#998;font-style:italic">//对象导航查询
+</span><span style="color:#998;font-style:italic"></span>		System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+	<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>对象导航查询的问题分析</p>
+<p>问题1：我们查询客户时，要不要把联系人查询出来？</p>
+<p>分析：如果我们不查的话，在用的时候还要自己写代码，调用方法去查询。如果我们查出来的，不使用时又会白白的浪费了服务器内存。</p>
+<p>解决：采用延迟加载的思想。通过配置的方式来设定当我们在需要使用时，发起真正的查询。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">	 * 在客户对象的@OneToMany注解中添加fetch属性
+</span><span style="color:#998;font-style:italic">	 * 		FetchType.EAGER	：立即加载
+</span><span style="color:#998;font-style:italic">	 * 		FetchType.LAZY	：延迟加载
+</span><span style="color:#998;font-style:italic">	 */</span>
+	<span style="color:#3c5d5d;font-weight:bold">@OneToMany</span><span style="color:#000;font-weight:bold">(</span>mappedBy<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;customer&#34;</span><span style="color:#000;font-weight:bold">,</span>fetch<span style="color:#000;font-weight:bold">=</span>FetchType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">EAGER</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Set<span style="color:#000;font-weight:bold">&lt;</span>LinkMan<span style="color:#000;font-weight:bold">&gt;</span> linkMans <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashSet<span style="color:#000;font-weight:bold">&lt;&gt;(</span>0<span style="color:#000;font-weight:bold">);</span>
+
+
+</code></pre></td></tr></table>
+</div>
+</div><p>我们查询联系人时，要不要把客户查询出来？</p>
+<p>分析：例如：查询联系人详情时，肯定会看看该联系人的所属客户。如果我们不查的话，在用的时候还要自己写代码，调用方法去查询。如果我们查出来的话，一个对象不会消耗太多的内存。而且多数情况下我们都是要使用的。</p>
+<p>解决： 采用立即加载的思想。通过配置的方式来设定，只要查询从表实体，就把主表实体对象同时查出来</p>
+<p>配置方式</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">	 * 在联系人对象的@ManyToOne注解中添加fetch属性
+</span><span style="color:#998;font-style:italic">	 * 		FetchType.EAGER	：立即加载
+</span><span style="color:#998;font-style:italic">	 * 		FetchType.LAZY	：延迟加载
+</span><span style="color:#998;font-style:italic">	 */</span>
+	<span style="color:#3c5d5d;font-weight:bold">@ManyToOne</span><span style="color:#000;font-weight:bold">(</span>targetEntity<span style="color:#000;font-weight:bold">=</span>Customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span>fetch<span style="color:#000;font-weight:bold">=</span>FetchType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">EAGER</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#3c5d5d;font-weight:bold">@JoinColumn</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cst_lkm_id&#34;</span><span style="color:#000;font-weight:bold">,</span>referencedColumnName<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;cust_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+	<span style="color:#000;font-weight:bold">private</span> Customer customer<span style="color:#000;font-weight:bold">;</span>
+
+
+
+</code></pre></td></tr></table>
+</div>
+</div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://jeremy95-sze.github.io/">Jeremy Sze</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/">https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/springDataJPA%E6%80%BB%E7%BB%93/">springDataJPA总结</a></li>
+        
+        <li><a href="/post/JPA/">JPA总结</a></li>
+        
+        <li><a href="/about/">关于我</a></li>
+        
+        <li><a href="/post/git%E6%80%BB%E7%BB%93/">git总结</a></li>
+        
+        <li><a href="/archives/">归档</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/springDataJPA'>springDataJPA</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://jeremy95-sze.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://jeremy95-sze.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/" title="springDataJPA_动态查询总结">springDataJPA_动态查询总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springDataJPA%E6%80%BB%E7%BB%93/" title="springDataJPA总结">springDataJPA总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JPA/" title="JPA总结">JPA总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/git%E6%80%BB%E7%BB%93/" title="git总结">git总结</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/spring/">spring (2)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/">数据层框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/">版本控制 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://jeremy95-sze.github.io/tags/JPA/">JPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/git/">git</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springDataJPA/">springDataJPA</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.cnblogs.com/Jeremy95-Sze/" title="Jeremy Sze的博客">Jeremy Sze的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://github.com/Jeremy95-Sze" title="Jeremy Sze的github">Jeremy Sze的github</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://jeremy95-sze.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://jeremy95-sze.github.io/">Jeremy Sze的博客 By Jeremy Sze</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" crossorigin="anonymous"></script>
+        <script>(function () {
+            if (!window.Diagram) return;
+            const blocks = document.querySelectorAll('pre code.language-sequence');
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                
+                const rootElement = block.parentNode;
+                const container = document.createElement('div');
+                const id = `js-sequence-diag-${i}`;
+                container.id = id;
+                container.className = 'align-center';
+                container.setAttribute("style", "overFlow-x:auto");
+                rootElement.parentNode.replaceChild(container, rootElement);
+
+                const diagram = Diagram.parse(block.childNodes[0].nodeValue);
+                diagram.drawSVG(id, window.sequenceDiagramsOptions
+                    ? window.sequenceDiagramsOptions
+                    : { theme: 'simple' });
+            }
+        })();
+        </script><script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'GA ID', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+</body>
+
+</html>
