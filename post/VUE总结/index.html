@@ -1,0 +1,1749 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>VUE总结 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="VUE总结 - Jeremy Sze的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2018-10-24T08:36:54&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2018-10-24T08:36:54&#43;08:00'>
+        
+    <meta name="Keywords" content="java,博客">
+    <meta name="description" content="VUE总结">
+        
+    <meta name="author" content="Jeremy Sze">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/post/VUE%E6%80%BB%E7%BB%93/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-4031353640611810",
+        enable_page_level_ads: true
+    });
+    </script>
+    
+
+
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://jeremy95-sze.github.io/">
+                        Jeremy Sze的博客
+                    </a>
+                
+                <p class="description">专注于Java、JavaScript、软件开发、web开发、分布式，微服务系统开发</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://jeremy95-sze.github.io/">首页</a>
+                    
+                    <a  href="https://jeremy95-sze.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#vuejs-概述与快速入门">VueJS 概述与快速入门</a>
+      <ul>
+        <li><a href="#vuejs介绍">VueJS介绍</a></li>
+        <li><a href="#mvvm模式">MVVM模式</a></li>
+      </ul>
+    </li>
+    <li><a href="#入门案例">入门案例</a>
+      <ul>
+        <li><a href="#插值表达式">插值表达式</a></li>
+      </ul>
+    </li>
+    <li><a href="#vuejs-常用系统指令">VueJS 常用系统指令</a></li>
+    <li><a href="#v-on">v-on</a>
+      <ul>
+        <li><a href="#写法二">写法二</a></li>
+      </ul>
+    </li>
+    <li><a href="#v-onkeydown">v-on:keydown</a></li>
+    <li><a href="#v-onmouseover">v-on:mouseover</a></li>
+    <li><a href="#事件修饰符">事件修饰符</a></li>
+    <li><a href="#按键修饰符">按键修饰符</a></li>
+    <li><a href="#v-text与v-html">v-text与v-html</a></li>
+    <li><a href="#v-bind">v-bind</a></li>
+    <li><a href="#v-model">v-model</a></li>
+    <li><a href="#v-for">v-for</a>
+      <ul>
+        <li><a href="#操作array">操作array</a></li>
+        <li><a href="#操作对象">操作对象</a></li>
+        <li><a href="#操作对象数组">操作对象数组</a></li>
+        <li><a href="#v-if与v-show">v-if与v-show</a></li>
+      </ul>
+    </li>
+    <li><a href="#vuejs生命周期">VueJS生命周期</a>
+      <ul>
+        <li><a href="#vue生命周期例子">vue生命周期例子</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">VUE总结</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年10月24日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6'>前端框架</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="vuejs-概述与快速入门">VueJS 概述与快速入门</h2>
+<h3 id="vuejs介绍">VueJS介绍</h3>
+<p>Vue.js是一个构建数据驱动的 web 界面的渐进式框架。Vue.js 的目标是通过尽可能简单的 API 实现响应的数据绑定和组合的视图组件。它不仅易于上手，还便于与第三方库或既有项目整合。</p>
+<p>官网: <a href="https://cn.vuejs.org/">https://cn.vuejs.org/</a></p>
+<h3 id="mvvm模式">MVVM模式</h3>
+<p>MVVM是Model-View-ViewModel的简写。$\color{red}{它本质上就是MVC 的改进版。MVVM 就是将其中的View 的状态和行为抽象化，让我们将视图 UI 和业务逻辑分开}$</p>
+<p>MVVM模式和MVC模式一样，主要目的是分离视图（View）和模型（Model）</p>
+<p>$\color{red}{Vue.js 是一个提供了 MVVM 风格的双向数据绑定的 Javascript 库，专注于View 层。}$它的核心是 MVVM 中的 VM，也就是 ViewModel。$\color{green}{ ViewModel负责连接 View 和 Model，保证视图和数据的一致性，}$这种轻量级的架构让前端开发更加高效、便捷
+<img src="/img/vue%E5%8E%9F%E7%90%86%E5%9B%BE.png" alt="alt vue原理图"></p>
+<h2 id="入门案例">入门案例</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;vue入门程序 hello Word&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--V--&gt;</span>
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    {{name}}
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">//VM
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;黄思聪&#34;</span>   <span style="color:#998;font-style:italic">//M
+</span><span style="color:#998;font-style:italic"></span>        }
+
+
+    });
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="插值表达式">插值表达式</h3>
+<p>数据绑定最常见的形式就是使用“Mustache”语法 (双大括号) 的文本插值，Mustache 标签将会被替代为对应数据对象上属性的值。无论何时，绑定的数据对象上属性发生了改变，插值处的内容都会更新。</p>
+<p>Vue.js 都提供了完全的 JavaScript 表达式支持。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{{ number + 1 }}
+{{ ok ? &#39;YES&#39; : &#39;NO&#39; }}
+</code></pre></td></tr></table>
+</div>
+</div><p>这些表达式会在所属 Vue 实例的数据作用域下作为 JavaScript 被解析。有个限制就是，每个绑定都只能包含单个表达式，所以下面的例子都不会生效。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">&lt;!-- 这是语句，不是表达式 --&gt;
+{{ var a = 1 }}
+&lt;!-- 流控制也不会生效，请使用三元表达式 --&gt;
+{{ if (ok) { return message } }}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="vuejs-常用系统指令">VueJS 常用系统指令</h2>
+<h2 id="v-on">v-on</h2>
+<p>可以用 v-on 指令监听 DOM 事件，并在触发时运行一些 JavaScript 代码</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span> <span style="color:#008080">xmlns:v-on</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-on:click练习&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--写法一--&gt;</span>
+   &lt;<span style="color:#000080">button</span> <span style="color:#008080">v-on:click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;biye(name,age)&#34;</span> &gt;毕业&lt;/<span style="color:#000080">button</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--写法二--&gt;</span>
+   &lt;<span style="color:#000080">button</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;biye1(name,age)&#34;</span> &gt;毕业&lt;/<span style="color:#000080">button</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+          name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;黄思聪&#39;</span>,
+          age<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;22岁&#39;</span>
+        },
+        method<span style="color:#000;font-weight:bold">:</span>biye<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">function</span> (name,age) {
+            alert(name<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;毕业快乐!!!!&#34;</span><span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;今年&#34;</span><span style="color:#000;font-weight:bold">+</span>age);
+        },
+        method<span style="color:#000;font-weight:bold">:</span>biye1<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">function</span> (name,age) {
+            name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;jeremy&#34;</span>;
+           age<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;25岁&#34;</span>;
+            alert(name<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;工作顺利，今年&#34;</span><span style="color:#000;font-weight:bold">+</span>age);
+        }
+
+
+    });
+
+
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="写法二">写法二</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span> <span style="color:#008080">xmlns:v-on</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-on:click练习&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--写法一--&gt;</span>
+  &lt;<span style="color:#000080">button</span> <span style="color:#008080">v-on:click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;biye(name,age)&#34;</span> &gt;毕业&lt;/<span style="color:#000080">button</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--写法二--&gt;</span>
+  &lt;<span style="color:#000080">button</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;biye1(name,age)&#34;</span> &gt;毕业&lt;/<span style="color:#000080">button</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+          name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;黄思聪&#39;</span>,
+          age<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;22岁&#39;</span>
+        },
+        methods<span style="color:#000;font-weight:bold">:</span>{
+            biye<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span> (name,age) {
+                alert(name<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;毕业快乐!!!!&#34;</span><span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;今年&#34;</span><span style="color:#000;font-weight:bold">+</span>age);
+            },
+            biye1<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span> (name,age) {
+                <span style="color:#000;font-weight:bold">this</span>.name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;jeremy&#34;</span>;
+                <span style="color:#000;font-weight:bold">this</span>.age<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;25岁&#34;</span>;
+                alert(<span style="color:#000;font-weight:bold">this</span>.name<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;工作顺利，今年&#34;</span><span style="color:#000;font-weight:bold">+</span><span style="color:#000;font-weight:bold">this</span>.age);
+            }
+
+        }
+
+
+    });
+
+
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="v-onkeydown">v-on:keydown</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf-8&#34;</span>/&gt;
+    &lt;<span style="color:#000080">title</span>&gt;事件处理 v-on示例2&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vuejs-2.5.16.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">v-on:keydown</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;fun2(&#39;good&#39;,$event)&#34;</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>, <span style="color:#998;font-style:italic">//表示当前vue对象接管了div区域
+</span><span style="color:#998;font-style:italic"></span>        methods<span style="color:#000;font-weight:bold">:</span> {
+            fun2<span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span> (msg, event) {
+                <span style="color:#000;font-weight:bold">if</span> (<span style="color:#000;font-weight:bold">!</span>((event.keyCode <span style="color:#000;font-weight:bold">&gt;=</span> <span style="color:#099">48</span> <span style="color:#000;font-weight:bold">&amp;&amp;</span> event.keyCode <span style="color:#000;font-weight:bold">&lt;=</span> <span style="color:#099">57</span>) <span style="color:#000;font-weight:bold">||</span> event.keyCode <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">8</span> <span style="color:#000;font-weight:bold">||</span> event.keyCode <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">46</span>)) {
+                    event.preventDefault();
+                }
+            }
+        }
+    });
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="v-onmouseover">v-on:mouseover</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf-8&#34;</span> /&gt;
+&lt;<span style="color:#000080">title</span>&gt;事件处理 v-on示例3&lt;/<span style="color:#000080">title</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vuejs-2.5.16.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+	&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+		&lt;<span style="color:#000080">div</span> <span style="color:#008080">v-on:mouseover</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;fun1&#34;</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;div&#34;</span>&gt;
+			&lt;<span style="color:#000080">textarea</span> <span style="color:#008080">v-on:mouseover</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;fun2($event)&#34;</span>&gt;这是一个文件域&lt;/<span style="color:#000080">textarea</span>&gt;
+		&lt;/<span style="color:#000080">div</span>&gt;
+	&lt;/<span style="color:#000080">div</span>&gt;
+	&lt;<span style="color:#000080">script</span>&gt;
+		<span style="color:#000;font-weight:bold">new</span> Vue({
+			el <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>, <span style="color:#998;font-style:italic">//表示当前vue对象接管了div区域
+</span><span style="color:#998;font-style:italic"></span>			methods <span style="color:#000;font-weight:bold">:</span> {
+				fun1 <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+					alert(<span style="color:#d14">&#34;div&#34;</span>);
+				},
+				fun2 <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>(event) {
+					alert(<span style="color:#d14">&#34;textarea&#34;</span>);
+					event.stopPropagation();<span style="color:#998;font-style:italic">//阻止冒泡
+</span><span style="color:#998;font-style:italic"></span>				}
+			}
+		});
+	&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="事件修饰符">事件修饰符</h2>
+<p>Vue.js 为 v-on 提供了事件修饰符来处理 DOM 事件细节，如：event.preventDefault() 或event.stopPropagation()</p>
+<p>Vue.js通过由点(.)表示的指令后缀来调用修饰符。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">.stop
+.prevent
+.capture
+.self
+.once
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf-8&#34;</span> /&gt;
+&lt;<span style="color:#000080">title</span>&gt;v-on 事件修饰符&lt;/<span style="color:#000080">title</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vuejs-2.5.16.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+	&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+	<span style="color:#998;font-style:italic">&lt;!--禁止提交 @submit.prevent--&gt;</span>
+		&lt;<span style="color:#000080">form</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">submit</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">prevent</span> <span style="color:#008080">action</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.itcast.cn&#34;</span> <span style="color:#008080">method</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;get&#34;</span>&gt;
+			&lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;submit&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;提交&#34;</span> /&gt;
+		&lt;/<span style="color:#000080">form</span>&gt;
+		&lt;<span style="color:#000080">div</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;fun1&#34;</span>&gt;
+		<span style="color:#998;font-style:italic">&lt;!--停止跳转@click.stop--&gt;</span>
+			&lt;<span style="color:#000080">a</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">click</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">stop</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.itcast.cn&#34;</span>&gt;itcast&lt;/<span style="color:#000080">a</span>&gt;
+		&lt;/<span style="color:#000080">div</span>&gt;
+	&lt;/<span style="color:#000080">div</span>&gt;
+	&lt;<span style="color:#000080">script</span>&gt;
+		<span style="color:#000;font-weight:bold">new</span> Vue({
+			el <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>, <span style="color:#998;font-style:italic">//表示当前vue对象接管了div区域
+</span><span style="color:#998;font-style:italic"></span>			methods <span style="color:#000;font-weight:bold">:</span> {
+				fun1 <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+					alert(<span style="color:#d14">&#34;hello itcast&#34;</span>);
+				}
+			}
+		});
+	&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="按键修饰符">按键修饰符</h2>
+<p>Vue 允许为 v-on 在监听键盘事件时添加按键修饰符</p>
+<p>全部的按键别名：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">.enter
+.tab
+.delete (捕获 &#34;删除&#34; 和 &#34;退格&#34; 键)
+.esc
+.space
+.up
+.down
+.left
+.right
+.ctrl
+.alt
+.shift
+.meta
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf-8&#34;</span> /&gt;
+&lt;<span style="color:#000080">title</span>&gt;v-on 按钮修饰符&lt;/<span style="color:#000080">title</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vuejs-2.5.16.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+	&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+	<span style="color:#998;font-style:italic">&lt;!--指定按上：回车键:keyup.enter --&gt;</span>
+		&lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">v-on:keyup</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">enter</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;fun1&#34;</span>&gt;
+	&lt;/<span style="color:#000080">div</span>&gt;
+	&lt;<span style="color:#000080">script</span>&gt;
+		<span style="color:#000;font-weight:bold">new</span> Vue({
+			el <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>, <span style="color:#998;font-style:italic">//表示当前vue对象接管了div区域
+</span><span style="color:#998;font-style:italic"></span>			methods <span style="color:#000;font-weight:bold">:</span> {
+				fun1 <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+					alert(<span style="color:#d14">&#34;你按了回车&#34;</span>);
+				}
+			}
+		});
+	&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="v-text与v-html">v-text与v-html</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-text与v-html&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-text</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;ags&#34;</span>&gt;&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-html</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;ags&#34;</span>&gt;&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            ags<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;&lt;h1&gt;黄思聪&lt;/h1&gt;&#34;</span>
+        }
+    });
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="v-bind">v-bind</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span> <span style="color:#008080">xmlns:v-bind</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-bind&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">font</span> <span style="color:#008080">v-text</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;ags&#34;</span> <span style="color:#008080">v-bind:color</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;yanse1&#34;</span>&gt;22&lt;/<span style="color:#000080">font</span>&gt;
+    &lt;<span style="color:#000080">font</span> <span style="color:#008080">v-html</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;ags&#34;</span> <span style="color:#008080">v-bind:color</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;yanse2&#34;</span>&gt;222&lt;/<span style="color:#000080">font</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            ags<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;&lt;h1&gt;黄思聪&lt;/h1&gt;&#34;</span>,
+            yanse1<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;red&#34;</span>,
+            yanse2<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;green&#34;</span>
+        }
+    });
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="v-model">v-model</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span> <span style="color:#008080">xmlns:v-bind</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span> <span style="color:#008080">xmlns:v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-model&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;username&#34;</span>/&gt;&lt;<span style="color:#000080">br</span>/&gt;
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;password&#34;</span>/&gt;
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;button&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;获取&#34;</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;huoqu(username,password)&#34;</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+
+            username<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&#39;</span>,
+            password<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&#39;</span>
+        },
+        methods<span style="color:#000;font-weight:bold">:</span>{
+            huoqu<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span> (username, password) {
+                alert(username<span style="color:#000;font-weight:bold">+</span>password)
+            }
+        }
+    });
+
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="v-for">v-for</h2>
+<h3 id="操作array">操作array</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span> <span style="color:#008080">xmlns:v-bind</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span> <span style="color:#008080">xmlns:v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-for07&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">ul</span>&gt;
+        &lt;<span style="color:#000080">li</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;(item,index) in list&#34;</span>&gt;{{index}} ==== {{item}}&lt;/<span style="color:#000080">li</span>&gt;
+    &lt;/<span style="color:#000080">ul</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+
+            list<span style="color:#000;font-weight:bold">:</span>[<span style="color:#099">1</span>,<span style="color:#099">2</span>,<span style="color:#099">3</span>,<span style="color:#099">4</span>,<span style="color:#099">5</span>,<span style="color:#099">6</span>,<span style="color:#099">7</span>,<span style="color:#099">8</span>,<span style="color:#099">9</span>]
+        },
+        methods<span style="color:#000;font-weight:bold">:</span>{
+            huoqu<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span> (username, password) {
+                alert(username<span style="color:#000;font-weight:bold">+</span>password)
+            }
+        }
+    });
+
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="操作对象">操作对象</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span> <span style="color:#008080">xmlns:v-bind</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span> <span style="color:#008080">xmlns:v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-for07&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+  
+    &lt;<span style="color:#000080">ul</span>&gt;
+        &lt;<span style="color:#000080">li</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;(value,key) in person&#34;</span>&gt;{{key}} ==== {{value}}&lt;/<span style="color:#000080">li</span>&gt;
+    &lt;/<span style="color:#000080">ul</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+
+            list<span style="color:#000;font-weight:bold">:</span>[<span style="color:#099">1</span>,<span style="color:#099">2</span>,<span style="color:#099">3</span>,<span style="color:#099">4</span>,<span style="color:#099">5</span>,<span style="color:#099">6</span>,<span style="color:#099">7</span>,<span style="color:#099">8</span>,<span style="color:#099">9</span>],
+            person<span style="color:#000;font-weight:bold">:</span>{
+                username<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;黄思聪&#39;</span>,
+                password<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;123456&#39;</span>,
+                age<span style="color:#000;font-weight:bold">:</span><span style="color:#099">22</span>
+
+            }
+        },
+        methods<span style="color:#000;font-weight:bold">:</span>{
+            huoqu<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span> (username, password) {
+                alert(username<span style="color:#000;font-weight:bold">+</span>password)
+            }
+        }
+    });
+
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="操作对象数组">操作对象数组</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span> <span style="color:#008080">xmlns:v-bind</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span> <span style="color:#008080">xmlns:v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-for07&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+&lt;<span style="color:#000080">table</span> <span style="color:#008080">border</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;1&#34;</span>&gt;
+    &lt;<span style="color:#000080">tr</span> <span style="color:#008080">align</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;center&#34;</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;id&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;名字&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;年龄&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+    &lt;<span style="color:#000080">tr</span> <span style="color:#008080">align</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;center&#34;</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;u in user&#34;</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;{{u.id}}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;{{u.name}}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;{{u.age}}&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+&lt;/<span style="color:#000080">table</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+
+            user<span style="color:#000;font-weight:bold">:</span>[
+            {
+            id<span style="color:#000;font-weight:bold">:</span><span style="color:#099">1</span>,
+            name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;黄思聪&#39;</span>,
+            age<span style="color:#000;font-weight:bold">:</span><span style="color:#099">22</span>
+
+            },
+            {
+                id<span style="color:#000;font-weight:bold">:</span><span style="color:#099">2</span>,
+                name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;Jeremy&#39;</span>,
+                age<span style="color:#000;font-weight:bold">:</span><span style="color:#099">25</span>
+
+            },
+            {
+                id<span style="color:#000;font-weight:bold">:</span><span style="color:#099">3</span>,
+                name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;黄家驹&#39;</span>,
+                age<span style="color:#000;font-weight:bold">:</span><span style="color:#099">31</span>
+
+            }
+            ]}
+
+    });
+
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="v-if与v-show">v-if与v-show</h3>
+<p>v-if是根据表达式的值来决定是否渲染元素</p>
+<p>v-show是根据表达式的值来切换元素的display css属性</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;v-if与v-show&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">style</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;text/css&#39;</span>&gt;&lt;/<span style="color:#000080">style</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+  &lt;<span style="color:#000080">span</span>  <span style="color:#008080">style</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;color: yellow&#34;</span>  <span style="color:#008080">v-show</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;flag&#34;</span> <span style="color:#008080">v-if</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;flag&#34;</span>&gt;黄思聪&lt;/<span style="color:#000080">span</span>&gt;
+  &lt;<span style="color:#000080">button</span>  <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;toggle()&#34;</span>&gt;切换&lt;/<span style="color:#000080">button</span>&gt;
+
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+    <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;#app&#34;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            flag<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>
+        },
+        methods<span style="color:#000;font-weight:bold">:</span>{
+            toggle<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span> () {
+                <span style="color:#000;font-weight:bold">this</span>.flag<span style="color:#000;font-weight:bold">=!</span><span style="color:#000;font-weight:bold">this</span>.flag;
+            }
+        }
+        
+        
+    });
+    
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="vuejs生命周期">VueJS生命周期</h2>
+<p>每个 Vue 实例在被创建之前都要经过一系列的初始化过程
+<img src="/img/vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.png" alt="alt vue生命周期">
+vue在生命周期中有这些状态：<br>
+beforeCreate,$\color{red}{created}$,beforeMount,$\color{red}{mounted}$,beforeUpdate,updated,beforeDestroy,destroyed。</p>
+<p>Vue在实例化的过程中，会调用这些生命周期的钩子，给我们提供了执行自定义逻辑的机会。那么，在这些vue钩子中，vue实例到底执行了那些操作，我们先看下面执行的例子</p>
+<h3 id="vue生命周期例子">vue生命周期例子</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf-8&#34;</span> /&gt;
+    &lt;<span style="color:#000080">title</span>&gt;生命周期&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;js/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;{{message}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#34;#app&#34;</span>,
+        data <span style="color:#000;font-weight:bold">:</span> {
+            message <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;hello world&#39;</span>
+        },
+        beforeCreate <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            console.log(<span style="color:#000;font-weight:bold">this</span>);
+            showData(<span style="color:#d14">&#39;创建vue实例前&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        },
+        created <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            showData(<span style="color:#d14">&#39;创建vue实例后&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        },
+        beforeMount <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            showData(<span style="color:#d14">&#39;挂载到dom前&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        },
+        mounted <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            showData(<span style="color:#d14">&#39;挂载到dom后&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        },
+        beforeUpdate <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            showData(<span style="color:#d14">&#39;数据变化更新前&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        },
+        updated <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            showData(<span style="color:#d14">&#39;数据变化更新后&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        },
+        beforeDestroy <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            vm.test <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;3333&#34;</span>;
+            showData(<span style="color:#d14">&#39;vue实例销毁前&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        },
+        destroyed <span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">function</span>() {
+            showData(<span style="color:#d14">&#39;vue实例销毁后&#39;</span>, <span style="color:#000;font-weight:bold">this</span>);
+        }
+    });
+    <span style="color:#000;font-weight:bold">function</span> realDom() {
+        console.log(<span style="color:#d14">&#39;真实dom结构：&#39;</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#0086b3">document</span>.getElementById(<span style="color:#d14">&#39;app&#39;</span>).innerHTML);
+    }
+    <span style="color:#000;font-weight:bold">function</span> showData(process, obj) {
+        console.log(process);
+        console.log(<span style="color:#d14">&#39;data 数据：&#39;</span> <span style="color:#000;font-weight:bold">+</span> obj.message)
+        console.log(<span style="color:#d14">&#39;挂载的对象：&#39;</span>)
+        console.log(obj.$el)
+        realDom();
+        console.log(<span style="color:#d14">&#39;------------------&#39;</span>)
+        console.log(<span style="color:#d14">&#39;------------------&#39;</span>)
+    }
+    vm.message <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;good...&#34;</span>;
+    vm.$destroy();
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+
+</code></pre></td></tr></table>
+</div>
+</div><p>vue对象初始化过程中，会执行到beforeCreate,created,beforeMount(挂载前 ),mounted（挂载后） 这几个钩子的内容</p>
+<p>1 beforeCreate ：数据还没有监听，没有绑定到vue对象实例，同时也没有挂载对象<br>
+2 created ：数据已经绑定到了对象实例，但是还没有挂载对象<br>
+3 beforeMount: 模板已经编译好了，根据数据和模板已经生成了对应的元素对象，将数据对象关联到了对象的el属性，el属性是一个HTMLElement对象，也就是这个阶段，vue实例通过原生的createElement等方法来创建这个html片段，准备注入到我们vue实例指明的el属性所对应的挂载点<br>
+4 mounted:将el的内容挂载到了el，相当于我们在jquery执行了(el).html(el),生成页面上真正的dom，上面我们就会发现dom的元素和我们el的元素是一致的。在此之后，我们能够用方法来获取到el元素下的dom对象，并进行各种操作。
+当我们的data发生改变时，会调用beforeUpdate和updated方<br>
+  beforeUpdate ：数据更新到dom之前，我们可以看到$el对象已经修改，但是我们页面上dom的数据还没有发生改变<br>
+  updated: dom结构会通过虚拟dom的原则，找到需要更新页面dom结构的最小路径，将改变更新到dom上面，完成更新<br>
+5 beforeDestroy,destroed :实例的销毁，vue实例还是存在的，只是解绑了事件的监听还有watcher对象数据与view的绑定，即数据驱动</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://jeremy95-sze.github.io/">Jeremy Sze</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/VUE%E6%80%BB%E7%BB%93/">https://jeremy95-sze.github.io/post/VUE%E6%80%BB%E7%BB%93/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/">springDataJPA_动态查询总结</a></li>
+        
+        <li><a href="/post/springDataJPA%E6%80%BB%E7%BB%93/">springDataJPA总结</a></li>
+        
+        <li><a href="/post/JPA/">JPA总结</a></li>
+        
+        <li><a href="/about/">关于我</a></li>
+        
+        <li><a href="/post/git%E6%80%BB%E7%BB%93/">git总结</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/VUE'>VUE</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://jeremy95-sze.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://jeremy95-sze.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/VUE%E6%80%BB%E7%BB%93/" title="VUE总结">VUE总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/" title="springDataJPA_动态查询总结">springDataJPA_动态查询总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springDataJPA%E6%80%BB%E7%BB%93/" title="springDataJPA总结">springDataJPA总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JPA/" title="JPA总结">JPA总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/git%E6%80%BB%E7%BB%93/" title="git总结">git总结</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/spring/">spring (2)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/">前端框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/">数据层框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/">版本控制 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://jeremy95-sze.github.io/tags/JPA/">JPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/VUE/">VUE</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/git/">git</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springDataJPA/">springDataJPA</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.cnblogs.com/Jeremy95-Sze/" title="Jeremy Sze的博客">Jeremy Sze的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://github.com/Jeremy95-Sze" title="Jeremy Sze的github">Jeremy Sze的github</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://jeremy95-sze.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://jeremy95-sze.github.io/">Jeremy Sze的博客 By Jeremy Sze</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" crossorigin="anonymous"></script>
+        <script>(function () {
+            if (!window.Diagram) return;
+            const blocks = document.querySelectorAll('pre code.language-sequence');
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                
+                const rootElement = block.parentNode;
+                const container = document.createElement('div');
+                const id = `js-sequence-diag-${i}`;
+                container.id = id;
+                container.className = 'align-center';
+                container.setAttribute("style", "overFlow-x:auto");
+                rootElement.parentNode.replaceChild(container, rootElement);
+
+                const diagram = Diagram.parse(block.childNodes[0].nodeValue);
+                diagram.drawSVG(id, window.sequenceDiagramsOptions
+                    ? window.sequenceDiagramsOptions
+                    : { theme: 'simple' });
+            }
+        })();
+        </script><script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'GA ID', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+</body>
+
+</html>
