@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 24 Oct 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 27 Oct 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>springboot总结</title>
+      <link>https://jeremy95-sze.github.io/post/springboot%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sat, 27 Oct 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/springboot%E6%80%BB%E7%BB%93/</guid>
+      <description>Spring简介 原有Spring优缺点分析 Spring是Java企业版（Java Enterprise Edition，JEE，也称J2EE）的轻量级代替品。无需开发重量级的Enterprise JavaBean（EJB），Spring为企业级Java开发提供了一种相对简单的方法，通过依赖注入和面向切面</description>
+    </item>
     
     <item>
       <title>VUE总结</title>
