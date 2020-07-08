@@ -6,20 +6,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>搜索 | Jeremy Sze的博客</title>
-    <meta property="og:title" content="搜索 - Jeremy Sze的博客">
+    <title>事务 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="事务 - Jeremy Sze的博客">
     <meta property="og:type" content="article">
         
         
     <meta name="Keywords" content="java,博客">
-    <meta name="description" content="搜索页面">
+    <meta name="description" content="事务">
         
     <meta name="author" content="Jeremy Sze">
-    <meta property="og:url" content="https://jeremy95-sze.github.io/search/">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1/">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
     <link rel="stylesheet" href='/css/style.css'>
+    <link rel="alternate" type="application/rss+xml+xml" href="https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1/index.xml" title="Jeremy Sze的博客" />
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     
@@ -73,71 +74,46 @@
                 <div class="col-8" id="main">
                     
 <div class="res-cons">
+    
     <h3 class="archive-title">
-        搜索
-        <span class="keyword">哈哈</span>
-        的结果
+        分类
+        <span class="keyword">事务</span>
+        中的文章
     </h3>
+    
 
+    
     <article class="post">
         <header>
             <h1 class="post-title">
-                <a href="链接">标题</a>
+                <a href="https://jeremy95-sze.github.io/post/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%80%BB%E7%BB%93/">分布式事务总结</a>
             </h1>
         </header>
         <date class="post-meta meta-date">
-            2019年12月01日
+            2018年10月29日
         </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1'>事务</a>
+            
+        </div>
+        
         <div class="post-content">
-            概要……
-            <p class="readmore"><a href="链接">阅读全文</a></p>
+            事务四大特性 如果一个数据库声称支持事务的操作，那么该数据库必须要具备以下四个特性： 原子性（Atomicity） 原子性是指事务包含的所有操作要么全部成功，要么全部失败回滚，因此事务的操作如果成功就必须要完全应用到数据库，如果操作失败则不能对数据库有任何影响。 一致性（Consiste……
+            <p class="readmore"><a href="https://jeremy95-sze.github.io/post/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%80%BB%E7%BB%93/">阅读全文</a></p>
         </div>
     </article>
+    
+
+    
+
+
+
+
 
 </div>
-
-<script type="text/javascript">
-
-    var getUrlParameter = function getUrlParameter(sParam) {
-        var sPageURL = window.location.search.substring(1),
-            sURLVariables = sPageURL.split('&'),
-            sParameterName,
-            i;
-
-        for (i = 0; i < sURLVariables.length; i++) {
-            sParameterName = sURLVariables[i].split('=');
-
-            if (sParameterName[0] === sParam) {
-                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-            }
-        }
-    };
-
-    $(document).ready(function () {
-        var q = getUrlParameter("q");
-        $("span.keyword").text(q);
-        $("article.post").remove();
-        $.ajax({
-            url: 'https:\/\/jeremy95-sze.github.io\/index.xml',
-            dataType: "xml",
-            success: function (data) {
-                $(data).find("item").each(function () {
-                    var item = $(this);
-                    var title = item.find("title").text();
-                    if (title.toLowerCase().indexOf(q.toLowerCase()) >= 0) {
-                        var url = item.find("link").text();
-                        var searchItem = `<article class="post"><header><h1 class="post-title"><a href="` + url + `">` + title + `</a></h1></header>`;
-                        var pubDate = new Date(item.find("pubDate").text())
-                        searchItem += `<date class="post-meta meta-date">` + pubDate.getFullYear() + `年` + (pubDate.getMonth() + 1) + `月` + pubDate.getDate() + `日</date>`;
-                        searchItem += `<div class="post-content">` + item.find("description").text() + `……<p class="readmore"><a href="` + url + `">阅读全文</a></p></div></article>`;
-
-                        $("div.res-cons").append(searchItem);
-                    }
-                });
-            }
-        });
-    });
-</script>
 
                 </div>
 
@@ -260,41 +236,6 @@
     </div>
 </footer>
 
-
-    
-    <script src="//cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js" crossorigin="anonymous"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js" crossorigin="anonymous"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" crossorigin="anonymous"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" crossorigin="anonymous"></script>
-        <script>(function () {
-            if (!window.Diagram) return;
-            const blocks = document.querySelectorAll('pre code.language-sequence');
-            for (let i = 0; i < blocks.length; i++) {
-                const block = blocks[i];
-                
-                const rootElement = block.parentNode;
-                const container = document.createElement('div');
-                const id = `js-sequence-diag-${i}`;
-                container.id = id;
-                container.className = 'align-center';
-                container.setAttribute("style", "overFlow-x:auto");
-                rootElement.parentNode.replaceChild(container, rootElement);
-
-                const diagram = Diagram.parse(block.childNodes[0].nodeValue);
-                diagram.drawSVG(id, window.sequenceDiagramsOptions
-                    ? window.sequenceDiagramsOptions
-                    : { theme: 'simple' });
-            }
-        })();
-        </script><script type="text/javascript">
-        window.MathJax = {
-            tex2jax: {
-                inlineMath: [['$', '$']],
-                processEscapes: true
-                }
-            };
-    </script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
 
 
 <a id="rocket" href="#top"></a>
