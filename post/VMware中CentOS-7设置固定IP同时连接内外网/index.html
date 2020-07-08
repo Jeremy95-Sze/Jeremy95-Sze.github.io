@@ -6,20 +6,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>git总结 | Jeremy Sze的博客</title>
-    <meta property="og:title" content="git总结 - Jeremy Sze的博客">
+    <title>Linux配置静态IP访问总结 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="Linux配置静态IP访问总结 - Jeremy Sze的博客">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2018-01-08T08:36:54&#43;08:00'>
+    <meta property="article:published_time" content='2018-10-30T08:36:54&#43;08:00'>
         
         
-    <meta property="article:modified_time" content='2018-01-08T08:36:54&#43;08:00'>
+    <meta property="article:modified_time" content='2018-10-30T08:36:54&#43;08:00'>
         
     <meta name="Keywords" content="java,博客">
-    <meta name="description" content="git总结">
+    <meta name="description" content="Linux配置静态IP访问总结">
         
     <meta name="author" content="Jeremy Sze">
-    <meta property="og:url" content="https://jeremy95-sze.github.io/post/git%E6%80%BB%E7%BB%93/">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -143,17 +143,17 @@
     <div class="post-toc-content">
         <nav id="TableOfContents">
   <ul>
-    <li><a href="#git介绍">git介绍</a></li>
-    <li><a href="#git与svn对比">Git与SVN对比</a></li>
-    <li><a href="#svn基本概念">SVN基本概念</a></li>
-    <li><a href="#git基本概念">Git基本概念</a></li>
-    <li><a href="#svn与git区别">SVN与Git区别</a></li>
-    <li><a href="#git工作流程">Git工作流程</a></li>
-    <li><a href="#创建版本库">创建版本库</a></li>
-    <li><a href="#使用gitbash">使用GitBash</a></li>
-    <li><a href="#tortoisegit分支管理">TortoiseGit分支管理</a></li>
-    <li><a href="#项目加入忽略文件">项目加入忽略文件</a></li>
-    <li><a href="#删除git远程仓库中指定文件">删除git远程仓库中指定文件</a></li>
+    <li><a href="#配置环境说明">配置环境说明</a></li>
+    <li><a href="#1设置虚拟机的网络连接方式">1设置虚拟机的网络连接方式</a></li>
+    <li><a href="#2配置虚拟机的nat模式具体地址参数">2配置虚拟机的NAT模式具体地址参数</a>
+      <ul>
+        <li><a href="#说明修改子网ip设置实现自由设置固定ip">说明：修改子网IP设置，实现自由设置固定IP；</a></li>
+      </ul>
+    </li>
+    <li><a href="#3配置主机具体vmnet8本地地址参数">3配置主机具体VMnet8本地地址参数</a></li>
+    <li><a href="#4修改centos-7系统为固定ip的配置文件">4.修改CentOS 7系统为固定IP的配置文件</a></li>
+    <li><a href="#需要重启">需要重启</a></li>
+    <li><a href="#5检验配置是否成功">5.检验配置是否成功</a></li>
   </ul>
 </nav>
     </div>
@@ -187,16 +187,16 @@
 </script>
     <article class="post">
         <header>
-            <h1 class="post-title">git总结</h1>
+            <h1 class="post-title">Linux配置静态IP访问总结</h1>
         </header>
         <date class="post-meta meta-date">
-            2018年1月8日
+            2018年10月30日
         </date>
         
         <div class="post-meta">
             <span>|</span>
             
-            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6'>版本控制</a></span>
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/Linux'>Linux</a></span>
             
         </div>
         
@@ -208,84 +208,101 @@
         
         
         <div class="post-content">
-            <h2 id="git介绍">git介绍</h2>
-<p>  同生活中的许多伟大事件一样，Git 诞生于一个极富纷争大举创新的年代,Linux 内核开源项目有着为数众广的参与者。绝大多数的 Linux 内核维护工作都花在了提交补丁和保存归档的繁琐事务上（1991－2002年间）。<br>
-  到 2002 年，Linux系统已经发展了十年了，代码库之大让Linus很难继续通过手工方式管理了，于是整个项目组开始启用分布式版本控制系统 BitKeeper 来管理和维护代码。
-到 2005 年的时候，开发 BitKeeper 的商业公司同 Linux 内核开源社区的合作关系结束，他们收回了免费使用 BitKeeper 的权力。这就迫使 Linux 开源社区（特别是 Linux的缔造者 Linus Torvalds林纳斯•托瓦兹）不得不吸取教训，只有开发一套属于自己的版本控制系统才不至于重蹈覆辙。<br>
-他们对新的系统订了若干目标：</p>
+            <h2 id="配置环境说明">配置环境说明</h2>
+<p>主机为win7，虚拟机为VMware Workstation 12 Pro中文版，虚拟机中的linux系统为CentOS 7 64位。</p>
+<h2 id="1设置虚拟机的网络连接方式">1设置虚拟机的网络连接方式</h2>
+<p>按照如下图设置，英文版的对照设置即可
+<img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP1.png" alt="alt linux配置静态IP1"></p>
+<h2 id="2配置虚拟机的nat模式具体地址参数">2配置虚拟机的NAT模式具体地址参数</h2>
+<p>1）编辑–虚拟网络编辑器–更改设置
+<img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP2.png" alt="alt linux配置静态IP2"><br>
+2）选择VMnet8–取消勾选使用本地DHCP–设置子网IP–网关IP设置（记住此处设置，后面要用到），如下图</p>
+<h3 id="说明修改子网ip设置实现自由设置固定ip">说明：修改子网IP设置，实现自由设置固定IP；</h3>
 <ol>
-<li>速度快</li>
-<li>简单的设计</li>
-<li>对非线性开发模式的强力支持（允许上千个并行开发的分支）</li>
-<li>完全分布式</li>
-<li>有能力高效管理类似 Linux 内核一样的超大规模项目（速度快和数据多）</li>
+<li>若你想设置固定IP为192.168.2.2-255，比如192.168.2.2，则子网IP为192.168.2.0；</li>
+<li>若你想设置固定IP为192.168.1.2-255，比如192.168.1.2，则子网IP为192.168.1.0；</li>
+<li>也就是说，你想配置成哪个网段，IP地址最后那位为0即可。
+<img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP3.png" alt="alt linux配置静态IP3"><br>
+网关IP可以参照如下格式修改：192.168.2.1
+<img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP4.png" alt="alt linux配置静态IP4"></li>
 </ol>
-<h2 id="git与svn对比">Git与SVN对比</h2>
-<h2 id="svn基本概念">SVN基本概念</h2>
-<p>  SVN是集中式版本控制软件，版本库是集中放在中央服务器的，而干活的时候，用的都是自己的电脑，所以首先要从中央服务器哪里得到最新的版本，然后干活，干完后，需要把自己做完的活推送到中央服务器。集中式版本控制系统是必须联网才能工作，如果在局域网还可以，带宽够大，速度够快，如果在互联网下，如果网速慢的话，就郁闷了。
-<img src="/img/svn.png" alt="alt svn原理图">
-  集中管理方式在一定程度上看到其他开发人员在干什么。但是相较于其优点而言，集中式版本控制工具缺点很明显:<br>
-服务器单点故障(只有一台服务器)<br>
-  容错性差</p>
-<h2 id="git基本概念">Git基本概念</h2>
-<p>  Git是分布式版本控制软件，那么它可以没有中央服务器的，每个人的电脑就是一个完整的版本库，这样，工作的时候就不需要联网了，因为版本都是在自己的电脑上。既然每个人的电脑都有一个完整的版本库，那多个人如何协作呢？比如说自己在电脑上改了文件A，其他人也在电脑上改了文件A，这时，你们两之间只需把各自的修改推送给对方，就可以互相看到对方的修改了。克隆
-<img src="/img/git.png" alt="alt git克隆拉取提交"></p>
-<h2 id="svn与git区别">SVN与Git区别</h2>
-<ul>
-<li>Git有多个仓库(分布式)、SVN只有一个仓库(集中式)</li>
-<li>Git是仓库对仓库、SVN是项目对仓库</li>
-</ul>
-<h2 id="git工作流程">Git工作流程</h2>
-<p>工作流程如下：</p>
-<ul>
-<li>克隆Git远程仓库中作为本地仓库。</li>
-<li>把本地仓库中的项目导入开发工具，然后开发项目。</li>
-<li>在提交前先将代码提交到暂存区。</li>
-<li>提交修改，提交到本地仓库。</li>
-<li>需要和团队成员共享代码时，push本地仓库代码到Git远程仓库。<br>
-Git的工作流程图：
-<img src="/img/git1.png" alt="alt git工作流程图"></li>
-</ul>
-<h2 id="创建版本库">创建版本库</h2>
-<p>  什么是版本库呢？版本库又名仓库，英文名repository，你可以简单理解成一个目录，这个目录里面的所有文件都可以被Git管理起来，每个文件的修改、删除，Git都能跟踪，以便任何时刻都可以追踪历史，或者在将来某个时刻可以“还原”。由于git是分布式版本管理工具，所以git在不需要联网的情况下也具有完整的版本管理能力。
-创建一个版本库非常简单，可以使用git bash也可以使用tortoiseGit。首先，选择一个合适的地方，创建一个空目录（D:\git_repo）。</p>
-<h2 id="使用gitbash">使用GitBash</h2>
-<p>在当前目录中点击右键中选择Git Bash来启动。</p>
-<ul>
-<li>版本库：“.git”目录就是版本库，提交的文件都需要保存到版本库中。</li>
-<li>工作目录：包含“.git”目录的目录，也就是.git目录的上一级目录就是工作目录。只有工作目录中的文件才能保存到版本库中。</li>
-</ul>
-<h2 id="tortoisegit分支管理">TortoiseGit分支管理</h2>
-<p>  在我们每次的提交，Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD指针用来指向目前我们操作的master分支，master分支才是我们提交的。
-<img src="/img/%E5%88%86%E6%94%AF.png" alt="alt 分支"></p>
-<h2 id="项目加入忽略文件">项目加入忽略文件</h2>
-<p>如下图，加入检入时需要忽略的文件.gitignore
-<img src="/img/%E5%BF%BD%E7%95%A5.png" alt="alt 忽略">
-.gitignore文件内容如下：<br>
-.idea<br>
-target<br>
-*.iml<br>
-.classpath<br>
-.project<br>
-.settings<br>
-bin</p>
-<h2 id="删除git远程仓库中指定文件">删除git远程仓库中指定文件</h2>
-<p>删除远程仓库中的指定文件<br>
-git rm -r  文件名或文件夹名</p>
-<p>添加暂存区<br>
-git add .</p>
-<p>提交到本地仓库 <br>
-git commit -m &ldquo;删除&rdquo;</p>
-<p>上传得远程仓库<br>
-git push</p>
-
+<h2 id="3配置主机具体vmnet8本地地址参数">3配置主机具体VMnet8本地地址参数</h2>
+<p>说明：第6步中的IP地址随意设置，但是要保证不能跟你要设置虚拟机的固定IP一样。我设置的是：192.168.116.1
+<img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP5.png" alt="alt linux配置静态IP5"></p>
+<h2 id="4修改centos-7系统为固定ip的配置文件">4.修改CentOS 7系统为固定IP的配置文件</h2>
+<p>进入centos7命令行界面，修改如下内容：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">cd /etc/sysconfig/network-scripts/
+vim ifcfg-eno16777736 #我的是ifcfg-en33,视电脑情况而定
+</code></pre></td></tr></table>
+</div>
+</div><p><img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP6.png" alt="alt linux配置静态IP6"><br>
+<img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP7.png" alt="alt linux配置静态IP7"><br>
+首先通过 vi ifcfg-en33进入编辑器，之后对图上变量进行修改，退出保存编辑器操作为，按Esc 之后，在insert模式下，再按shift+冒号: ,再按wq保存退出</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">BOOTPROTO=static        #开机协议，有dhcp及static；
+ONBOOT=yes              #设置为开机启动；
+DNS1=114.114.114.114    #这个是国内的DNS地址，是固定的；
+IPADDR=192.168.2.2      #你想要设置的固定IP，理论上192.168.2.2-255之间都可以，请自行验证；
+NETMASK=255.255.255.0   #子网掩码，不需要修改；
+GATEWAY=192.168.2.1     #网关，这里应该和你“2.配置虚拟机的NAT模式具体地址参数”中的（2）选择VMnet8--取消勾选使用本地DHCP--设置子网IP--网关IP设置 一样才行。
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="需要重启">需要重启</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt"> Service network restart
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="5检验配置是否成功">5.检验配置是否成功</h2>
+<p>查看修改后的固定IP为192.168.2.2，配置正确；</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">ifconfig
+# 或者
+ip addr
+</code></pre></td></tr></table>
+</div>
+</div><p><img src="/img/linux%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP8.png" alt="alt linux配置静态IP8"><br>
+测试虚拟机中的CentOS 7系统是否能连外网，有数据返回，说明可以连接外网</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">ping www.baidu.com
+</code></pre></td></tr></table>
+</div>
+</div>
         </div>
 
         
 <div class="post-archive">
     <ul class="post-copyright">
         <li><strong>原文作者：</strong><a rel="author" href="https://jeremy95-sze.github.io/">Jeremy Sze</a></li>
-        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/git%E6%80%BB%E7%BB%93/">https://jeremy95-sze.github.io/post/git%E6%80%BB%E7%BB%93/</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/">https://jeremy95-sze.github.io/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/</a></li>
         <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
     </ul>
 </div>
@@ -299,9 +316,15 @@ git push</p>
     <h2>See Also</h2>
     <ul class="listing">
         
-        <li><a href="/archives/">归档</a></li>
+        <li><a href="/post/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%80%BB%E7%BB%93/">分布式事务总结</a></li>
         
-        <li><a href="/search/">搜索</a></li>
+        <li><a href="/post/springboot%E6%80%BB%E7%BB%93/">springboot总结</a></li>
+        
+        <li><a href="/post/VUE%E6%80%BB%E7%BB%93/">VUE总结</a></li>
+        
+        <li><a href="/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/">springDataJPA_动态查询总结</a></li>
+        
+        <li><a href="/post/springDataJPA%E6%80%BB%E7%BB%93/">springDataJPA总结</a></li>
         
     </ul>
 </div>
@@ -311,7 +334,7 @@ git push</p>
             
             <ul class="clearfix">
                 
-                <li><a href='https://jeremy95-sze.github.io/tags/git'>git</a></li>
+                <li><a href='https://jeremy95-sze.github.io/tags/Linux%E9%85%8D%E7%BD%AE%E8%81%94%E7%BD%91'>Linux配置联网</a></li>
                 
             </ul>
             
