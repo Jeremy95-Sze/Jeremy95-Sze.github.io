@@ -1,0 +1,1343 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Docker总结 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="Docker总结 - Jeremy Sze的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2018-10-30T08:36:54&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2018-10-30T08:36:54&#43;08:00'>
+        
+    <meta name="Keywords" content="java,博客">
+    <meta name="description" content="Docker总结">
+        
+    <meta name="author" content="Jeremy Sze">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/post/Docker%E6%80%BB%E7%BB%93/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-4031353640611810",
+        enable_page_level_ads: true
+    });
+    </script>
+    
+
+
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://jeremy95-sze.github.io/">
+                        Jeremy Sze的博客
+                    </a>
+                
+                <p class="description">专注于Java、JavaScript、软件开发、web开发、分布式，微服务系统开发</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://jeremy95-sze.github.io/">首页</a>
+                    
+                    <a  href="https://jeremy95-sze.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#docker-简介">Docker 简介</a></li>
+    <li><a href="#什么是虚拟化">什么是虚拟化</a></li>
+    <li><a href="#什么是-docker">什么是 Docker</a></li>
+    <li><a href="#为什么选择-docker">为什么选择 Docker?</a></li>
+    <li><a href="#容器与虚拟机比较">容器与虚拟机比较</a></li>
+    <li><a href="#装软件的三种方式centos7">装软件的三种方式（CentOS7）：</a></li>
+    <li><a href="#docker-组件">Docker 组件</a>
+      <ul>
+        <li><a href="#docker-服务器与客户端">Docker 服务器与客户端</a></li>
+      </ul>
+    </li>
+    <li><a href="#docker-镜像与容器">Docker 镜像与容器</a></li>
+    <li><a href="#registry注册中心">Registry（注册中心）</a></li>
+    <li><a href="#docker-安装与启动">Docker 安装与启动</a>
+      <ul>
+        <li><a href="#yum-包更新到最新">yum 包更新到最新</a></li>
+        <li><a href="#安装需要的软件包yum-util-提供-yum-config-manager-功能另外两个是-devicemapper驱动依赖的">安装需要的软件包，yum-util 提供 yum-config-manager 功能，另外两个是 devicemapper驱动依赖的</a></li>
+        <li><a href="#设置-yum-源为阿里云">设置 yum 源为阿里云</a></li>
+        <li><a href="#安装-docker">安装 docker</a></li>
+        <li><a href="#安装后查看-docker-版本">安装后查看 docker 版本</a></li>
+        <li><a href="#设置-ustc-的镜">设置 ustc 的镜</a></li>
+      </ul>
+    </li>
+    <li><a href="#docker-启动与停止">Docker 启动与停止</a>
+      <ul>
+        <li><a href="#systemctl-命令是系统服务管理器指令">systemctl 命令是系统服务管理器指令</a></li>
+      </ul>
+    </li>
+    <li><a href="#docker-常用命令">Docker 常用命令</a>
+      <ul>
+        <li><a href="#查看镜像">查看镜像</a></li>
+        <li><a href="#搜素镜像">搜素镜像</a></li>
+      </ul>
+    </li>
+    <li><a href="#拉取镜像">拉取镜像</a>
+      <ul>
+        <li><a href="#拉取镜像就是从中央仓库中下载镜像到本地">拉取镜像就是从中央仓库中下载镜像到本地</a></li>
+      </ul>
+    </li>
+    <li><a href="#删除镜像">删除镜像</a></li>
+    <li><a href="#容器相关命令">容器相关命令</a>
+      <ul>
+        <li><a href="#查看正在运行的容器">查看正在运行的容器</a></li>
+      </ul>
+    </li>
+    <li><a href="#创建与启动容器">创建与启动容器</a>
+      <ul>
+        <li><a href="#交互式方式创建容器">交互式方式创建容器</a></li>
+      </ul>
+    </li>
+    <li><a href="#守护式方式创建容器">守护式方式创建容器：</a></li>
+    <li><a href="#停止与启动容器">停止与启动容器</a>
+      <ul>
+        <li><a href="#停止容器">停止容器</a></li>
+        <li><a href="#启动容器">启动容器</a></li>
+        <li><a href="#删除容器">删除容器</a></li>
+      </ul>
+    </li>
+    <li><a href="#文件拷贝">文件拷贝</a>
+      <ul>
+        <li><a href="#如果我们需要将文件拷贝到容器内可以使用-cp-命令">如果我们需要将文件拷贝到容器内可以使用 cp 命令</a></li>
+        <li><a href="#也可以将文件从容器内拷贝出来">也可以将文件从容器内拷贝出来</a></li>
+      </ul>
+    </li>
+    <li><a href="#目录挂载">目录挂载</a></li>
+    <li><a href="#应用部署">应用部署</a>
+      <ul>
+        <li><a href="#mysql-部署">MySQL 部署</a></li>
+        <li><a href="#创建容器">创建容器</a></li>
+        <li><a href="#tomcat-部署">Tomcat 部署</a></li>
+        <li><a href="#nginx-部">Nginx 部</a></li>
+        <li><a href="#redis-部署">Redis 部署</a></li>
+      </ul>
+    </li>
+    <li><a href="#迁移与备份">迁移与备份</a>
+      <ul>
+        <li><a href="#容器保存为镜像">容器保存为镜像</a></li>
+        <li><a href="#镜像备份">镜像备份</a></li>
+        <li><a href="#镜像恢复与迁移">镜像恢复与迁移</a></li>
+      </ul>
+    </li>
+    <li><a href="#什么-dockerfile">什么 Dockerfile</a></li>
+    <li><a href="#常用命令">.常用命令</a></li>
+    <li><a href="#使用脚本创建镜像">使用脚本创建镜像</a></li>
+    <li><a href="#docker-私有仓库">Docker 私有仓库</a>
+      <ul>
+        <li><a href="#私有仓库搭建与配置">私有仓库搭建与配置</a></li>
+        <li><a href="#镜像上传至私有仓库">镜像上传至私有仓库</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Docker总结</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年10月30日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/docker'>docker</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="docker-简介">Docker 简介</h2>
+<h2 id="什么是虚拟化">什么是虚拟化</h2>
+<p>  在计算机中，虚拟化（英语：Virtualization）是一种资源管理技术，是将计算机的各种实体
+资源，如服务器、网络、内存及存储等，予以抽象、转换后呈现出来，打破实体结构间的不
+可切割的障碍，使用户可以比原本的组态更好的方式来应用这些资源。这些资源的新虚拟部
+份是不受现有资源的架设方式，地域或物理组态所限制。一般所指的虚拟化资源包括计算能
+力和资料存储。<br>
+  在实际的生产环境中，虚拟化技术主要用来解决高性能的物理硬件产能过剩和老的旧的
+硬件产能过低的重组重用，透明化底层物理硬件，从而最大化的利用物理硬件 对资源充分
+利用<br>
+  虚拟化技术种类很多，例如：软件虚拟化、硬件虚拟化、内存虚拟化、网络虚拟化(vip)、
+桌面虚拟化、服务虚拟化、虚拟机等等。</p>
+<h2 id="什么是-docker">什么是 Docker</h2>
+<p>  Docker 是一个开源项目，诞生于 2013 年初，最初是 dotCloud 公司内部的一个业余项目。
+它基于 Google 公司推出的 Go 语言实现。 项目后来加入了 Linux 基金会，遵从了 Apache
+2.0 协议，项目代码在 GitHub 上进行维护。
+<img src="/img/docker.png" alt="alt docker">
+Docker 自开源后受到广泛的关注和讨论，以至于 dotCloud 公司后来都改名为 Docker Inc。
+Redhat 已经在其 RHEL6.5 中集中支持 Docker；Google 也在其 PaaS 产品中广泛应用。<br>
+  Docker 项目的目标是实现轻量级的操作系统虚拟化解决方案。 Docker 的基础是 Linux
+容器（LXC）等技术。<br>
+  在 LXC 的基础上 Docker 进行了进一步的封装，让用户不需要去关心容器的管理，使
+得操作更为简便。用户操作 Docker 的容器就像操作一个快速轻量级的虚拟机一样简单。</p>
+<h2 id="为什么选择-docker">为什么选择 Docker?</h2>
+<ol>
+<li>上手快。<br>
+  用户只需要几分钟，就可以把自己的程序“Docker 化”。Docker 依赖于“写时复制”
+（copy-on-write）模型，使修改应用程序也非常迅速，可以说达到“随心所致，代码即改”
+的境界。<br>
+  随后，就可以创建容器来运行应用程序了。大多数 Docker 容器只需要不到 1 秒中即可
+启动。由于去除了管理程序的开销，Docker 容器拥有很高的性能，同时同一台宿主机中也
+可以运行更多的容器，使用户尽可能的充分利用系统资源。</li>
+<li>职责的逻辑分类<br>
+  使用 Docker，开发人员只需要关心容器中运行的应用程序，而运维人员只需要关心如
+何管理容器。Docker 设计的目的就是要加强开发人员写代码的开发环境与应用程序要部署
+的生产环境一致性。从而降低那种“开发时一切正常，肯定是运维的问题（测试环境都是正
+常的，上线后出了问题就归结为肯定是运维的问题）”</li>
+<li>快速高效的开发生命周期<br>
+  Docker 的目标之一就是缩短代码从开发、测试到部署、上线运行的周期，让你的应用
+程序具备可移植性，易于构建，并易于协作。（通俗一点说，Docker 就像一个盒子，里面
+可以装很多物件，如果需要这些物件的可以直接将该大盒子拿走，而不需要从该盒子中一件
+件的取。）</li>
+<li>鼓励使用面向服务的架构<br>
+  Docker 还鼓励面向服务的体系结构和微服务架构。Docker 推荐单个容器只运行一个应
+用程序或进程，这样就形成了一个分布式的应用程序模型，在这种模型下，应用程序或者服
+务都可以表示为一系列内部互联的容器，从而使分布式部署应用程序，扩展或调试应用程序
+都变得非常简单，同时也提高了程序的内省性。（当然，可以在一个容器中运行多个应用程
+序）</li>
+</ol>
+<h2 id="容器与虚拟机比较">容器与虚拟机比较</h2>
+<p>与传统的虚拟机相比，Docker 优势体现为启动速度快、占用体积小。
+$\color{red}{Docker的作用是解决软件在不同的Linux系统之间的移植问题}$</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">海运                     软件开发
+
+蓝鲸（货轮）         Docker
+集装箱                    容器
+码头                       Linux
+
+描述
+我们的软件开发就像海运一样，而Docker就充当货轮，容器就是上面载着的集装箱，
+里面放的货物就是各个软件，然后运输到码头，相当于Linux系统，
+这样就实现把软件移植到别的Linux系统上面去运行了。
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="装软件的三种方式centos7">装软件的三种方式（CentOS7）：</h2>
+<ol>
+<li>把软件直接安装在CentOS7    移植性差</li>
+<li>在CentOS7的基础先安装VM Ware软件，在VM Ware再安装CentOS7，在CentOS7再安装软件   占用内存大</li>
+<li>在CentOS7的基础安装Docker软件，在Docker里面安装软件                 移植性好，占用内存小</li>
+</ol>
+<p><strong>镜像（Image）： 安装软件所需要的安装包</strong></p>
+<p><strong>容器（Container）：在镜像基础上，把软件安装起来，运行起来的效果</strong></p>
+<p><strong>宿主机：指装软件的CentOS7系统</strong></p>
+<h2 id="docker-组件">Docker 组件</h2>
+<h3 id="docker-服务器与客户端">Docker 服务器与客户端</h3>
+<p>  Docker 是一个客户端-服务器（C/S）架构程序。Docker 客户端只需要向 Docker 服务器或者
+守护进程发出请求，服务器或者守护进程将完成所有工作并返回结果。Docker 提供了一个
+命令行工具 Docker 以及一整套 RESTful API。你可以在同一台宿主机上运行 Docker 守护进程
+和客户端，也可以从本地的 Docker 客户端连接到运行在另一台宿主机上的远程 Docker 守护
+进程。
+<img src="/img/dockerCS%E6%9E%B6%E6%9E%84.png" alt="alt dockerCS架构"></p>
+<h2 id="docker-镜像与容器">Docker 镜像与容器</h2>
+<p>  镜像是构建 Docker 的基石。用户基于镜像来运行自己的容器。镜像也是 Docker 生命周期中
+的“构建”部分。镜像是基于联合文件系统的一种层式结构，由一系列指令一步一步构建出
+来。例如：</p>
+<ol>
+<li>添加一个文件；</li>
+<li>执行一个命令；</li>
+<li>打开一个窗口。<br>
+也可以将镜像当作容器的“源代码”。镜像体积很小，非常“便携”，易于分享、存储和更
+新。<br>
+  Docker 可以帮助你构建和部署容器，你只需要把自己的应用程序或者服务打包放进容
+器即可。容器是基于镜像启动起来的，容器中可以运行一个或多个进程。我们可以认为，镜
+像是 Docker 生命周期中的构建或者打包阶段，而容器则是启动或者执行阶段。 容器基于
+镜像启动，一旦容器启动完成后，我们就可以登录到容器中安装自己需要的软件或者服务。
+所以 Docker 容器就是：<br>
+<strong>一个镜像格式；</strong><br>
+<strong>一些列标准操作；</strong> <br>
+<strong>一个执行环境。</strong><br>
+  Docker 借鉴了标准集装箱的概念。标准集装箱将货物运往世界各地，Docker 将这个模
+型运用到自己的设计中，唯一不同的是：$\color{red}{集装箱运输货物，而 Docker 运输软件。}$<br>
+  和集装箱一样，Docker 在执行上述操作时，并不关心容器中到底装了什么，它不管是
+web 服务器，还是数据库，或者是应用程序服务器什么的。所有的容器都按照相同的方式将
+内容“装载”进去。<br>
+  Docker 也不关心你要把容器运到何方：我们可以在自己的笔记本中构建容器，上传到
+Registry，然后下载到一个物理的或者虚拟的服务器来测试，在把容器部署到具体的主机中。
+像标准集装箱一样，Docker 容器方便替换，可以叠加，易于分发，并且尽量通用。
+<img src="/img/%E4%B8%8D%E5%90%8CLinux%E4%B9%8B%E9%97%B4%E8%BD%AF%E4%BB%B6%E7%A7%BB%E6%A4%8D%E6%B5%81%E7%A8%8B%E5%9B%BE.png" alt="alt 不同Linux之间软件移植流程图"></li>
+</ol>
+<h2 id="registry注册中心">Registry（注册中心）</h2>
+<p>  Docker 用 Registry 来保存用户构建的镜像。Registry 分为公共和私有两种。Docker 公司运营
+公共的 Registry 叫做 Docker Hub。用户可以在 Docker Hub 注册账号，分享并保存自己的镜像
+(说明：在 Docker Hub 下载镜像巨慢，可以自己构建私有的 Registry)。</p>
+<p><a href="https://hub.docker.com/">https://hub.docker.com/</a></p>
+<h2 id="docker-安装与启动">Docker 安装与启动</h2>
+<p>  Docker 官方建议在 Ubuntu 中安装，因为 Docker 是基于 Ubuntu 发布的，而且一般 Docker
+出现的问题 Ubuntu 是最先更新或者打补丁的。在很多版本的 CentOS 中是不支持更新最新
+的一些补丁包的。<br>
+  由于我们学习的环境都使用的是 CentOS，因此这里我们将 Docker 安装到 CentOS 上。
+注意：这里建议安装在 CentOS7.x 以上的版本，在 CentOS6.x 的版本中，安装前需要安装其
+他很多的环境而且 Docker 很多补丁不支持更新。</p>
+<h3 id="yum-包更新到最新">yum 包更新到最新</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">sudo yum update
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="安装需要的软件包yum-util-提供-yum-config-manager-功能另外两个是-devicemapper驱动依赖的">安装需要的软件包，yum-util 提供 yum-config-manager 功能，另外两个是 devicemapper驱动依赖的</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="设置-yum-源为阿里云">设置 yum 源为阿里云</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">sudo yum-config-manager --add-repo
+http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="安装-docker">安装 docker</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">sudo yum install docker-ce
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="安装后查看-docker-版本">安装后查看 docker 版本</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker -v
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="设置-ustc-的镜">设置 ustc 的镜</h3>
+<p>  ustc 是老牌的 linux 镜像服务提供者了，还在遥远的 ubuntu 5.04 版本的时候就在用。ustc 的
+docker 镜像加速器速度很快。ustc docker mirror 的优势之一就是不需要注册，是真正的公共服务。</p>
+<p><a href="https://lug.ustc.edu.cn/wiki/mirrors/help/docker">https://lug.ustc.edu.cn/wiki/mirrors/help/docker</a><br>
+编辑该文件：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">vi /etc/docker/daemon.json
+</code></pre></td></tr></table>
+</div>
+</div><p>在该文件中输入如下内容：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+	&#34;registry-mirrors&#34;: [&#34;https://docker.mirrors.ustc.edu.cn&#34;]
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="docker-启动与停止">Docker 启动与停止</h2>
+<h3 id="systemctl-命令是系统服务管理器指令">systemctl 命令是系统服务管理器指令</h3>
+<p>启动 docker：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">systemctl start docker
+</code></pre></td></tr></table>
+</div>
+</div><p>停止 docker：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">systemctl stop docker
+</code></pre></td></tr></table>
+</div>
+</div><p>重启 docker：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">systemctl restart docker
+</code></pre></td></tr></table>
+</div>
+</div><p>查看 docker 状态：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">systemctl status docker
+</code></pre></td></tr></table>
+</div>
+</div><p>开机自启动：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">systemctl enable docker
+</code></pre></td></tr></table>
+</div>
+</div><p>查看 docker 概要信息</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker info
+</code></pre></td></tr></table>
+</div>
+</div><p>查看 docker 帮助文档</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker info
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="docker-常用命令">Docker 常用命令</h2>
+<h3 id="查看镜像">查看镜像</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker images
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>REPOSITORY：镜像名称</strong><br>
+<strong>TAG：镜像标签</strong><br>
+<strong>IMAGE ID：镜像 ID</strong><br>
+<strong>CREATED：镜像的创建日期（不是获取该镜像的日期）</strong><br>
+<strong>SIZE：镜像大小</strong><br>
+<strong>这些镜像都是存储在 Docker 宿主机的/var/lib/docker 目录下</strong></p>
+<h3 id="搜素镜像">搜素镜像</h3>
+<p>如果你需要从网络中查找需要的镜像，可以通过以下命令搜索</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker search 镜像名称
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">NAME：仓库名称
+DESCRIPTION：镜像描述
+STARS：用户评价，反应一个镜像的受欢迎程度
+OFFICIAL：是否官方
+AUTOMATED：自动构建，表示该镜像由 Docker Hub 自动构建流程创建的
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="拉取镜像">拉取镜像</h2>
+<h3 id="拉取镜像就是从中央仓库中下载镜像到本地">拉取镜像就是从中央仓库中下载镜像到本地</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull 镜像名称
+</code></pre></td></tr></table>
+</div>
+</div><p>例如，我要下载 centos7 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull centos:7
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="删除镜像">删除镜像</h2>
+<p>按镜像 ID 删除镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker rmi 镜像 ID
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="容器相关命令">容器相关命令</h2>
+<h3 id="查看正在运行的容器">查看正在运行的容器</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker ps
+</code></pre></td></tr></table>
+</div>
+</div><p>查看所有容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker ps -a
+</code></pre></td></tr></table>
+</div>
+</div><p>查看最后一次运行的容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker ps -l
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="创建与启动容器">创建与启动容器</h2>
+<p>###创建容器常用的参数说明：<br>
+创建容器命令：docker run<br>
+  -i：表示运行容器<br>
+  -t：表示容器启动后会进入其命令行。加入这两个参数后，容器创建就能登录进去。即分配一个伪终端。<br>
+  &ndash;name :为创建的容器命名。<br>
+  -v：表示目录映射关系(前者是宿主机目录,后者是映射到宿主机上的目录)可以使用多个－v 做多个目录或文件映射。
+    注意：最好做目录映射，在宿主机上做修改，然后共享到容器上。<br>
+  -d：在 run 后面加上-d 参数,则会创建一个守护式容器在后台运行（这样创建容器后不会自动登录容器，<br>
+    如果只加-i -t 两个参数，创建后就会自动进去容器）。<br>
+  -p：表示端口映射，前者是宿主机端口，后者是容器内的映射端口。可以使用多个-p 做多个端口映射
+<img src="/img/docker%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84.png" alt="alt docker端口映射"></p>
+<h3 id="交互式方式创建容器">交互式方式创建容器</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -it --name=容器名称 镜像名称:标签 /bin/bash
+</code></pre></td></tr></table>
+</div>
+</div><p>这时我们通过 ps 命令查看，发现可以看到启动的容器，状态为启动状态<br>
+退出当前容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">exit
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="守护式方式创建容器">守护式方式创建容器：</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=容器名称 镜像名称:标签
+</code></pre></td></tr></table>
+</div>
+</div><p>登录守护式容器方式：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker exec -it 容器名称 (或者容器 ID) /bin/bash
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="停止与启动容器">停止与启动容器</h2>
+<h3 id="停止容器">停止容器</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker stop 容器名称（或者容器 ID）
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="启动容器">启动容器</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker start 容器名称（或者容器 ID）
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="删除容器">删除容器</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker rm 容器id(CONTAINER ID)
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="文件拷贝">文件拷贝</h2>
+<h3 id="如果我们需要将文件拷贝到容器内可以使用-cp-命令">如果我们需要将文件拷贝到容器内可以使用 cp 命令</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker cp 需要拷贝的文件或目录 容器名称:容器目录
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="也可以将文件从容器内拷贝出来">也可以将文件从容器内拷贝出来</h3>
+<pre><code class="language-tzt" data-lang="tzt">docker cp 容器名称:容器目录 需要拷贝的文件或目录
+</code></pre><h2 id="目录挂载">目录挂载</h2>
+<p>我们可以在创建容器的时候，将宿主机的目录与容器内的目录进行映射，这样我们就可以通
+过修改宿主机某个目录的文件从而去影响容器。创建容器 添加-v 参数 后边为 宿主机目录:
+容器目录，例如：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di -v /usr/local/myhtml:/usr/local/myhtml --name=mycentos3 centos:7
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="应用部署">应用部署</h2>
+<h3 id="mysql-部署">MySQL 部署</h3>
+<p>拉取 mysql 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull centos/mysql-57-centos7
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="创建容器">创建容器</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=tensquare_mysql(容器名) -p(设置端口号映射) 33306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql(镜像名)
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">p 代表端口映射，格式为 宿主机映射端口:容器运行端口
+-e 代表添加环境变量 MYSQL_ROOT_PASSWORD 是 root 用户的登陆密码
+（3）远程登录 mysql
+连接宿主机的 IP ,指定端口为 33306
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="tomcat-部署">Tomcat 部署</h3>
+<p>拉取镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull tomcat:7-jre7
+</code></pre></td></tr></table>
+</div>
+</div><p>创建容器
+创建容器 -p 表示地址映射</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=mytomcat -p 9090:8080 tomcat:7-jre7
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="nginx-部">Nginx 部</h3>
+<p>拉取镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull 
+</code></pre></td></tr></table>
+</div>
+</div><p>创建 Nginx 容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=mynginx -p 80:80 nginx
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="redis-部署">Redis 部署</h3>
+<p>拉取镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull redis
+</code></pre></td></tr></table>
+</div>
+</div><p>创建容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=myredis -p 6379:6379 redis
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="迁移与备份">迁移与备份</h2>
+<h3 id="容器保存为镜像">容器保存为镜像</h3>
+<p>我们可以通过以下命令将容器保存为镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker commit mynginx mynginx_i
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="镜像备份">镜像备份</h3>
+<p>我们可以通过以下命令将镜像保存为 tar 文件</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker save -o mynginx.tar mynginx_i
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="镜像恢复与迁移">镜像恢复与迁移</h3>
+<p>首先我们先删除掉 mynginx_img 镜像 然后执行此命令进行恢复</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker load -i mynginx.tar
+</code></pre></td></tr></table>
+</div>
+</div><p>-i 输入的文件<br>
+执行后再次查看镜像，可以看到镜像已经恢复</p>
+<h2 id="什么-dockerfile">什么 Dockerfile</h2>
+<p>Dockerfile 是由一系列命令和参数构成的脚本，这些命令应用于基础镜像并最终创建一个新
+的镜像。</p>
+<ol>
+<li>对于开发人员：可以为开发团队提供一个完全一致的开发环境；</li>
+<li>对于测试人员：可以直接拿开发时所构建的镜像或者通过 Dockerfile 文件构建一个新的镜像开始工作了；</li>
+<li>对于运维人员：在部署时，可以实现应用的无缝移植。</li>
+</ol>
+<h2 id="常用命令">.常用命令</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">命令 作用
+FROM image_name:tag		 定义了使用哪个基础镜像启动构建流程
+MAINTAINER user_name	 声明镜像的创建者
+ENV key value 			 设置环境变量 (可以写多条)
+RUN command 			 是 Dockerfile 的核心部分(可以写多条)
+ADD source_dir/file		 将宿主机的文件复制到容器内，如果是一个压缩文件，将会在复制后自动解压
+dest_dir/file
+COPY source_dir/file	 和 ADD 相似，但是如果有压缩文件并不能解压
+dest_dir/file
+WORKDIR path_dir 		 设置工作目录
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="使用脚本创建镜像">使用脚本创建镜像</h2>
+<p><img src="/img/jdk%E5%88%B6%E4%BD%9C%E9%95%9C%E5%83%8F.png" alt="alt jdk制作镜像">
+步骤：</p>
+<ol>
+<li>创建目录</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">mkdir –p /usr/local/dockerjdk8
+</code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>下载 jdk-8u171-linux-x64.tar.gz 并上传到服务器（虚拟机）中的/usr/local/dockerjdk8目录</li>
+<li>创建文件 Dockerfile vi Dockerfile</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">#依赖镜像名称和 ID
+FROM centos:7
+#指定镜像创建者信息
+MAINTAINER ITCAST
+#切换工作目录
+WORKDIR /usr
+RUN mkdir /usr/local/java
+#ADD 是相对路径 jar,把 java 添加到容器中
+ADD jdk-8u171-linux-x64.tar.gz /usr/local/java/
+#配置 java 环境变量
+ENV JAVA_HOME /usr/local/java/jdk1.8.0_171
+ENV JRE_HOME $JAVA_HOME/jre
+ENV PATH $JAVA_HOME/bin:$PATH
+</code></pre></td></tr></table>
+</div>
+</div><ol start="4">
+<li>执行命令构建镜像</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker build -t=&#39;jdk1.8&#39; .
+</code></pre></td></tr></table>
+</div>
+</div><p>注意后边的空格和点，不要省略
+5. 查看镜像是否建立完成</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker images
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="docker-私有仓库">Docker 私有仓库</h2>
+<h3 id="私有仓库搭建与配置">私有仓库搭建与配置</h3>
+<ol>
+<li>拉取私有仓库镜像（此步省略）</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull registry
+</code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>启动私有仓库容器</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=registry -p 5000:5000 registry
+</code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>打 开 浏 览 器 输 入 地 址 http://192.168.184.141:5000/v2/_catalog 看到{&ldquo;repositories&rdquo;:[]} 表示私有仓库搭建成功并且内容为空</li>
+<li>修改 daemon.json （/etc/docker/daemon.json）
+添加以下内容，保存退出。</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{&#34;insecure-registries&#34;:[&#34;192.168.184.141:5000&#34;]}
+</code></pre></td></tr></table>
+</div>
+</div><p>此步用于让 docker 信任私有仓库地址
+5. 重启 docker 服务</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">systemctl restart docker
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="镜像上传至私有仓库">镜像上传至私有仓库</h3>
+<ol>
+<li>标记此镜像为私有仓库的镜像</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker tag jdk1.8 192.168.184.141:5000/jdk1.8
+</code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>再次启动私服容器</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker start registry
+</code></pre></td></tr></table>
+</div>
+</div><p>3.上传标记的镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker push 192.168.184.141:5000/jdk1.8
+</code></pre></td></tr></table>
+</div>
+</div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://jeremy95-sze.github.io/">Jeremy Sze</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/Docker%E6%80%BB%E7%BB%93/">https://jeremy95-sze.github.io/post/Docker%E6%80%BB%E7%BB%93/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/">Linux配置静态IP访问总结</a></li>
+        
+        <li><a href="/post/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%80%BB%E7%BB%93/">分布式事务总结</a></li>
+        
+        <li><a href="/post/springboot%E6%80%BB%E7%BB%93/">springboot总结</a></li>
+        
+        <li><a href="/post/VUE%E6%80%BB%E7%BB%93/">VUE总结</a></li>
+        
+        <li><a href="/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/">springDataJPA_动态查询总结</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/docker'>docker</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://jeremy95-sze.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://jeremy95-sze.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/Docker%E6%80%BB%E7%BB%93/" title="Docker总结">Docker总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/" title="Linux配置静态IP访问总结">Linux配置静态IP访问总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%80%BB%E7%BB%93/" title="分布式事务总结">分布式事务总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springboot%E6%80%BB%E7%BB%93/" title="springboot总结">springboot总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/VUE%E6%80%BB%E7%BB%93/" title="VUE总结">VUE总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/" title="springDataJPA_动态查询总结">springDataJPA_动态查询总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springDataJPA%E6%80%BB%E7%BB%93/" title="springDataJPA总结">springDataJPA总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JPA/" title="JPA总结">JPA总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/git%E6%80%BB%E7%BB%93/" title="git总结">git总结</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/Linux/">Linux (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/docker/">docker (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/spring/">spring (3)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1/">事务 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/">前端框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/">数据层框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/">版本控制 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://jeremy95-sze.github.io/tags/JPA/">JPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Linux%E9%85%8D%E7%BD%AE%E8%81%94%E7%BD%91/">Linux配置联网</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/VUE/">VUE</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/docker/">docker</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/git/">git</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springDataJPA/">springDataJPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springboot/">springboot</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.cnblogs.com/Jeremy95-Sze/" title="Jeremy Sze的博客">Jeremy Sze的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://github.com/Jeremy95-Sze" title="Jeremy Sze的github">Jeremy Sze的github</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://jeremy95-sze.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://jeremy95-sze.github.io/">Jeremy Sze的博客 By Jeremy Sze</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" crossorigin="anonymous"></script>
+        <script>(function () {
+            if (!window.Diagram) return;
+            const blocks = document.querySelectorAll('pre code.language-sequence');
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                
+                const rootElement = block.parentNode;
+                const container = document.createElement('div');
+                const id = `js-sequence-diag-${i}`;
+                container.id = id;
+                container.className = 'align-center';
+                container.setAttribute("style", "overFlow-x:auto");
+                rootElement.parentNode.replaceChild(container, rootElement);
+
+                const diagram = Diagram.parse(block.childNodes[0].nodeValue);
+                diagram.drawSVG(id, window.sequenceDiagramsOptions
+                    ? window.sequenceDiagramsOptions
+                    : { theme: 'simple' });
+            }
+        })();
+        </script><script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'GA ID', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+</body>
+
+</html>

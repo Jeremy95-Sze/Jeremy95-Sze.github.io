@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>docker on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/tags/docker/</link>
+    <description>Recent content in docker on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 30 Oct 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Docker总结</title>
+      <link>https://jeremy95-sze.github.io/post/Docker%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Tue, 30 Oct 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/Docker%E6%80%BB%E7%BB%93/</guid>
+      <description>Docker 简介 什么是虚拟化 在计算机中，虚拟化（英语：Virtualization）是一种资源管理技术，是将计算机的各种实体 资源，如服务器、网络、内存及存储等，予以抽象、转换后呈现出来，打破实体结构间的不 可切割的障碍，使用户可以比原本的组态更好的方式来应用这些资源。这些资源的新虚拟部 份是不</description>
+    </item>
+    
+  </channel>
+</rss>
