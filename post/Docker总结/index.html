@@ -912,7 +912,7 @@ AUTOMATED：自动构建，表示该镜像由 Docker Hub 自动构建流程创�
 FROM image_name:tag		 定义了使用哪个基础镜像启动构建流程
 MAINTAINER user_name	 声明镜像的创建者
 ENV key value 			 设置环境变量 (可以写多条)
-RUN command 			 是 Dockerfile 的核心部分(可以写多条)
+RUN command 			 是 Dockerfile 的核心部分(可以写多条) 指在执行构建期间需要做些事，因此在这里指定
 ADD source_dir/file		 将宿主机的文件复制到容器内，如果是一个压缩文件，将会在复制后自动解压
 dest_dir/file
 COPY source_dir/file	 和 ADD 相似，但是如果有压缩文件并不能解压
@@ -953,6 +953,8 @@ WORKDIR path_dir 		 设置工作目录
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">#依赖镜像名称和 ID
@@ -967,7 +969,9 @@ ADD jdk-8u171-linux-x64.tar.gz /usr/local/java/
 #配置 java 环境变量
 ENV JAVA_HOME /usr/local/java/jdk1.8.0_171
 ENV JRE_HOME $JAVA_HOME/jre
-ENV PATH $JAVA_HOME/bin:$PATH
+ENV PATH $JAVA_HOME/bin:$PATH			
+
+#:$PATH(表示在当前PATH的value下，进行追加，如果没有加该参数则会覆盖全部的value)
 </code></pre></td></tr></table>
 </div>
 </div><ol start="4">
@@ -976,9 +980,15 @@ ENV PATH $JAVA_HOME/bin:$PATH
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker build -t=&#39;jdk1.8&#39; .
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker build -t=&#39;jdk1.8&#39; .       			
+
+&#39;jdk1.8&#39; 为构建完之后的镜像名字， 
+. 点代表是当前路径下，如果要别的路径则修改过来即可
 </code></pre></td></tr></table>
 </div>
 </div><p>注意后边的空格和点，不要省略
