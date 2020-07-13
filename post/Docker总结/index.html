@@ -782,12 +782,21 @@ AUTOMATED：自动构建，表示该镜像由 Docker Hub 自动构建流程创�
 </code></pre></td></tr></table>
 </div>
 </div><h3 id="创建容器">创建容器</h3>
+<p>docker参数$\color{red}{&ndash;restart=always}$ 的作用</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=tensquare_mysql(容器名) -p(设置端口号映射) 33306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql(镜像名)
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">创建容器时没有添加参数  --restart=always ，导致的后果是：当 Docker 重启时，容器未能自动启动。
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=tensquare_mysql(容器名) --restart=always -p(设置端口号映射) 33306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql(镜像名)
 </code></pre></td></tr></table>
 </div>
 </div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
@@ -919,7 +928,7 @@ AUTOMATED：自动构建，表示该镜像由 Docker Hub 自动构建流程创�
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">命令 作用
-FROM image_name:tag		 定义了使用哪个基础镜像启动构建流程
+FROM image_name:tag		 定义了使用哪个基础镜像启动构建流程，例如tomcat，他依赖于jdk,那么这里就写jdk的版本，像jdk他不依赖于其他东西，这里也要写上最基础的依赖，就写当前系统，centos:7
 MAINTAINER user_name	 声明镜像的创建者
 ENV key value 			 设置环境变量 (可以写多条)
 RUN command 			 是 Dockerfile 的核心部分(可以写多条) 指在执行构建期间需要做些事，因此在这里指定
