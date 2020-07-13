@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>缓存 on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/categories/%E7%BC%93%E5%AD%98/</link>
+    <description>Recent content in 缓存 on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 01 Nov 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/categories/%E7%BC%93%E5%AD%98/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>springdataredis与springCache区别</title>
+      <link>https://jeremy95-sze.github.io/post/springdataredis%E4%B8%8EspringCache%E5%8C%BA%E5%88%AB/</link>
+      <pubDate>Thu, 01 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/springdataredis%E4%B8%8EspringCache%E5%8C%BA%E5%88%AB/</guid>
+      <description>代码实现角度 SpringCache只需要在方法上面加上@Cacable @CacacheEvict就可以实现缓存，比较简单！ Spring Data Redis需要修改原来的方法，加入逻辑才可以实现，相对复杂点！ 存储方式角度 Spring Cache缓存在应用内存中，应用停止，缓存丢失啦！ Spring Data Redis缓存在Redi</description>
+    </item>
+    
+  </channel>
+</rss>
