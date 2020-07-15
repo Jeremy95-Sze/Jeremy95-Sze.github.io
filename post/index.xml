@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 02 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 03 Nov 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>MongoDB总结</title>
+      <link>https://jeremy95-sze.github.io/post/MongoDB%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sat, 03 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/MongoDB%E6%80%BB%E7%BB%93/</guid>
+      <description>MongoDB 简介 对于这样的数据，我们更适合使用 MongoDB来实现数据的存储 数据量大 写入操作频繁 价值较低 比如 评论信息 吐槽信息 什么是 MongoDB MongoDB 是一个跨平台的，面向文档的数据库，是当前 NoSQL 数据库产品中 最热门的一种。$\color{red}{它介于关系数据库和非关系数据库之间，是非关系数据库当中功 能最丰</description>
+    </item>
     
     <item>
       <title>微服务为什么不用写接口</title>

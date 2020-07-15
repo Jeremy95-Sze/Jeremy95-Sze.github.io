@@ -6,10 +6,19 @@
     <description>Recent content in Tags on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 02 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 03 Nov 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>MongoDB</title>
+      <link>https://jeremy95-sze.github.io/tags/MongoDB/</link>
+      <pubDate>Sat, 03 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/tags/MongoDB/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>分布式</title>
