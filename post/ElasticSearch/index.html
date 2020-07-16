@@ -1,0 +1,1608 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>ElasticSearch总结 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="ElasticSearch总结 - Jeremy Sze的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2018-11-05T08:36:54&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2018-11-05T08:36:54&#43;08:00'>
+        
+    <meta name="Keywords" content="java,博客">
+    <meta name="description" content="ElasticSearch总结">
+        
+    <meta name="author" content="Jeremy Sze">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/post/ElasticSearch/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-4031353640611810",
+        enable_page_level_ads: true
+    });
+    </script>
+    
+
+
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://jeremy95-sze.github.io/">
+                        Jeremy Sze的博客
+                    </a>
+                
+                <p class="description">专注于Java、JavaScript、软件开发、web开发、分布式，微服务系统开发</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://jeremy95-sze.github.io/">首页</a>
+                    
+                    <a  href="https://jeremy95-sze.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#什么是-elasticsearch">什么是 ElasticSearch</a></li>
+    <li><a href="#elasticsearch-特点">ElasticSearch 特点</a></li>
+    <li><a href="#solr-与-elasticsearch-对比">Solr 与 Elasticsearch 对比</a></li>
+    <li><a href="#elasticsearch-部署与启动">ElasticSearch 部署与启动</a></li>
+    <li><a href="#elasticsearch-体系结构">ElasticSearch 体系结构</a></li>
+    <li><a href="#postman-调用-rest-api">Postman 调用 REST API</a></li>
+    <li><a href="#新建文档">新建文档</a></li>
+    <li><a href="#查询全部文档">查询全部文档</a></li>
+    <li><a href="#修改文档">修改文档</a></li>
+    <li><a href="#按照-id-查询文档">按照 ID 查询文档</a></li>
+    <li><a href="#基本匹配查询">基本匹配查询</a></li>
+    <li><a href="#模糊查询">模糊查询</a></li>
+    <li><a href="#删除文档">删除文档</a></li>
+    <li><a href="#head-插件的安装与使用">Head 插件的安装与使用</a>
+      <ul>
+        <li><a href="#head-插件安装">Head 插件安装</a></li>
+      </ul>
+    </li>
+    <li><a href="#elasticsearch-与-mysql-数据同步">ElasticSearch 与 MySQL 数据同步</a></li>
+    <li><a href="#什么-logstash">什么 logstash</a></li>
+    <li><a href="#logstash-安装与测试">logstash 安装与测试</a></li>
+    <li><a href="#mysql-数据导入-elasticsearch">MySQL 数据导入 ElasticSearch</a></li>
+    <li><a href="#代码实现">代码实现</a></li>
+    <li><a href="#流程图">流程图</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">ElasticSearch总结</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年11月5日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E'>搜索引擎</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="什么是-elasticsearch">什么是 ElasticSearch</h2>
+<p>  Elasticsearch 是一个实时的分布式搜索和分析引擎。它可以帮助你用前所未有的速度去处理
+大规模数据。$\color{red}{ElasticSearch 是一个基于 Lucene 的搜索服务器。}$ 
+<em><strong>它提供了一个分布式多用户能力的全文搜索引擎，基于 RESTful web 接口。Elasticsearch 是用 Java 开发的，并作为 Apache许可条款下的开放源码发布，是当前流行的企业级搜索引擎。</strong></em> 
+$\color{green}{设计用于云计算中，能够达到实时搜索，稳定，可靠，快速，安装使用方便。}$</p>
+<h2 id="elasticsearch-特点">ElasticSearch 特点</h2>
+<ol>
+<li>可以作为一个大型分布式集群（数百台服务器）技术，处理 PB 级数据，服务大公司；也可以运行在单机上</li>
+<li>将全文检索、数据分析以及分布式技术，合并在了一起，才形成了独一无二的 ES；</li>
+<li>开箱即用的，部署简单</li>
+<li>全文检索，同义词处理，相关度排名，复杂数据分析，海量数据的近实时处理</li>
+</ol>
+<h2 id="solr-与-elasticsearch-对比">Solr 与 Elasticsearch 对比</h2>
+<ul>
+<li>Solr 利用 Zookeeper 进行分布式管理，而 Elasticsearch 自身带有分布式协调管理功能;</li>
+<li>Solr 支持更多格式的数据，而 Elasticsearch 仅支持 json 文件格式；</li>
+<li>Solr 官方提供的功能更多，而 Elasticsearch 本身更注重于核心功能，高级功能多有第<br>
+三方插件提供；</li>
+<li>Solr 在传统的搜索应用中表现好于 Elasticsearch，但在处理实时搜索应用时效率明显低于 Elasticsearch。</li>
+<li>Solr 是传统搜索应用的有力解决方案，但 Elasticsearch 更适用于新兴的实时搜索应用。</li>
+</ul>
+<h2 id="elasticsearch-部署与启动">ElasticSearch 部署与启动</h2>
+<p>下载 ElasticSearch 5.6.8 版本<br>
+<a href="https://www.elastic.co/downloads/past-releases/elasticsearch-5-6-8">https://www.elastic.co/downloads/past-releases/elasticsearch-5-6-8</a><br>
+在命令提示符下，进入 ElasticSearch 安装目录下的 bin 目录,执行命令</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">elasticsearch
+</code></pre></td></tr></table>
+</div>
+</div><p>即可启动。<br>
+我们打开浏览器，在地址栏输入 http://127.0.0.1:9200 即可看到输出结果</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;name&#34; : &#34;uV2glMR&#34;,
+&#34;cluster_name&#34; : &#34;elasticsearch&#34;,
+&#34;cluster_uuid&#34; : &#34;RdV7UTQZT1‐Jnka9dDPsFg&#34;,
+&#34;version&#34; : {
+&#34;number&#34; : &#34;5.6.8&#34;,
+&#34;build_hash&#34; : &#34;688ecce&#34;,
+&#34;build_date&#34; : &#34;2018‐02‐16T16:46:30.010Z&#34;,
+&#34;build_snapshot&#34; : false,
+&#34;lucene_version&#34; : &#34;6.6.1&#34;
+},
+&#34;tagline&#34; : &#34;You Know, for Search&#34;
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="elasticsearch-体系结构">ElasticSearch 体系结构</h2>
+<p><img src="/img/elasticsearch%E4%B8%8Emysq%E7%BB%93%E6%9E%84l%E5%AF%B9%E6%AF%94.png" alt="alt elasticsearch与mysq结构l对比"></p>
+<h2 id="postman-调用-rest-api">Postman 调用 REST API</h2>
+<p>例如我们要创建一个叫 articleindex 的索引 ，就以 put 方式提交<br>
+http://127.0.0.1:9200/articleindex/
+<img src="/img/postman%E5%88%9B%E5%BB%BAelasticsearch%E7%B4%A2%E5%BC%95.png" alt="alt postman创建elasticsearch索引"></p>
+<h2 id="新建文档">新建文档</h2>
+<p>以 post 方式提交 http://127.0.0.1:9200/articleindex/article<br>
+body:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;title&#34;:&#34;SpringBoot2.0&#34;,
+&#34;content&#34;:&#34;发布啦&#34;
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>返回结果如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;_index&#34;: &#34;articleindex&#34;,
+&#34;_type&#34;: &#34;article&#34;,
+&#34;_id&#34;: &#34;AWPKsdh0FdLZnId5S_F9&#34;,
+&#34;_version&#34;: 1,
+&#34;result&#34;: &#34;created&#34;,
+&#34;_shards&#34;: {
+&#34;total&#34;: 2,
+&#34;successful&#34;: 1,
+&#34;failed&#34;: 0
+},
+&#34;created&#34;: true
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>id 是由系统自动生成的。 为了方便之后的演示，我们再次录入几条测试数据。</p>
+<h2 id="查询全部文档">查询全部文档</h2>
+<p>查询某索引某类型的全部数据，以 get 方式请求<br>
+http://127.0.0.1:9200/articleindex/article/_search<br>
+返回结果如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;took&#34;: 5,
+&#34;timed_out&#34;: false,
+&#34;_shards&#34;: {
+&#34;total&#34;: 5,
+&#34;successful&#34;: 5,
+&#34;skipped&#34;: 0,
+&#34;failed&#34;: 0
+},
+&#34;hits&#34;: {
+&#34;total&#34;: 2,
+&#34;max_score&#34;: 1,
+&#34;hits&#34;: [
+{
+&#34;_index&#34;: &#34;articleindex&#34;,
+&#34;_type&#34;: &#34;article&#34;,
+&#34;_id&#34;: &#34;AWPKrI4pFdLZnId5S_F7&#34;,
+&#34;_score&#34;: 1,
+&#34;_source&#34;: {
+&#34;title&#34;: &#34;SpringBoot2.0&#34;,
+&#34;content&#34;: &#34;发布啦&#34;
+}
+},
+{
+&#34;_index&#34;: &#34;articleindex&#34;,
+&#34;_type&#34;: &#34;article&#34;,
+&#34;_id&#34;: &#34;AWPKsdh0FdLZnId5S_F9&#34;,
+&#34;_score&#34;: 1,
+&#34;_source&#34;: {
+&#34;title&#34;: &#34;elasticsearch 入门&#34;,
+&#34;content&#34;: &#34;零基础入门&#34;
+}
+}
+]
+}
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="修改文档">修改文档</h2>
+<p>以 put 形式提交以下地址<br>
+http://127.0.0.1:9200/articleindex/article/AWPKrI4pFdLZnId5S_F7<br>
+body:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;title&#34;:&#34;SpringBoot2.0 正式版&#34;,
+&#34;content&#34;:&#34;发布了吗&#34;
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>返回结果：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;_index&#34;: &#34;articleindex&#34;,
+&#34;_type&#34;: &#34;article&#34;,
+&#34;_id&#34;: &#34;AWPKsdh0FdLZnId5S_F9&#34;,
+&#34;_version&#34;: 2,
+&#34;result&#34;: &#34;updated&#34;,
+&#34;_shards&#34;: {
+&#34;total&#34;: 2,
+&#34;successful&#34;: 1,
+&#34;failed&#34;: 0
+},
+&#34;created&#34;: false
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>如果我们在地址中的 ID 不存在，则会创建新文档<br>
+以 put 形式提交以下地址：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http://127.0.0.1:9200/articleindex/article/
+</code></pre></td></tr></table>
+</div>
+</div><p>body:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;title&#34;:&#34;十次方课程好给力&#34;,
+&#34;content&#34;:&#34;知识点很多&#34;
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>返回结果</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;_index&#34;: &#34;articleindex&#34;,
+&#34;_type&#34;: &#34;article&#34;,
+&#34;_id&#34;: &#34;1&#34;,
+&#34;_version&#34;: 1,
+&#34;result&#34;: &#34;created&#34;,
+&#34;_shards&#34;: {
+&#34;total&#34;: 2,
+&#34;successful&#34;: 1,
+&#34;failed&#34;: 0
+},
+&#34;created&#34;: true
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>再次查询，看是否有新增的这条文档</p>
+<h2 id="按照-id-查询文档">按照 ID 查询文档</h2>
+<p>GET 方式请求</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http://127.0.0.1:9200/articleindex/article/1
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="基本匹配查询">基本匹配查询</h2>
+<p>根据某列进行查询 get 方式提交下列地址：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http://127.0.0.1:9200/articleindex/article/_search?q=title:你好
+</code></pre></td></tr></table>
+</div>
+</div><p>根据某列进行查询 get 方式提交下列地址：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;took&#34;: 10,
+&#34;timed_out&#34;: false,
+&#34;_shards&#34;: {
+&#34;total&#34;: 5,
+&#34;successful&#34;: 5,
+&#34;skipped&#34;: 0,
+&#34;failed&#34;: 0
+},
+&#34;hits&#34;: {
+&#34;total&#34;: 1,
+&#34;max_score&#34;: 2.0649285,
+&#34;hits&#34;: [
+{
+&#34;_index&#34;: &#34;articleindex&#34;,
+&#34;_type&#34;: &#34;article&#34;,
+&#34;_id&#34;: &#34;1&#34;,
+&#34;_score&#34;: 2.0649285,
+&#34;_source&#34;: {
+&#34;title&#34;: &#34;你好&#34;,
+&#34;content&#34;: &#34;知识点很多&#34;
+}
+}
+]
+}
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="模糊查询">模糊查询</h2>
+<p>我们可以用*代表任意字符：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http://127.0.0.1:9200/articleindex/article/_search?q=title:*s*
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="删除文档">删除文档</h2>
+<p>根据 ID 删除文档,删除 ID 为 1 的文档 DELETE 方式提交</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http://127.0.0.1:9200/articleindex/article/1
+</code></pre></td></tr></table>
+</div>
+</div><p>返回结果如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">{
+&#34;found&#34;: true,
+&#34;_index&#34;: &#34;articleindex&#34;,
+&#34;_type&#34;: &#34;article&#34;,
+&#34;_id&#34;: &#34;1&#34;,
+&#34;_version&#34;: 2,
+&#34;result&#34;: &#34;deleted&#34;,
+&#34;_shards&#34;: {
+&#34;total&#34;: 2,
+&#34;successful&#34;: 1,
+&#34;failed&#34;: 0
+}
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>再次查看全部是否还存在此记录</p>
+<h2 id="head-插件的安装与使用">Head 插件的安装与使用</h2>
+<h3 id="head-插件安装">Head 插件安装</h3>
+<p>如果都是通过 rest 请求的方式使用 Elasticsearch，未免太过麻烦，而且也不够人性化。我们
+一般都会使用图形化界面来实现 Elasticsearch 的日常管理，最常用的就是 Head 插件。
+步骤 1：<br>
+下载 head 插件：https://github.com/mobz/elasticsearch-head<br>
+步骤 2：<br>
+解压到任意目录，但是要和 elasticsearch 的安装目录区别开。<br>
+步骤 3：<br>
+安装 node js ,安装 cnpm</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">npm install ‐g cnpm ‐‐registry=https://registry.npm.taobao.org
+</code></pre></td></tr></table>
+</div>
+</div><p>步骤 4：<br>
+将 grunt 安装为全局命令 。Grunt 是基于 Node.js 的项目构建工具。它可以自动运行你所设定的任务</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">npm install ‐g grunt‐cli
+</code></pre></td></tr></table>
+</div>
+</div><p>步骤 5：安装依赖</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">cnpm install
+</code></pre></td></tr></table>
+</div>
+</div><p>步骤 6：<br>
+进入 head 目录启动 head，在命令提示符下输入命令</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">grunt server
+</code></pre></td></tr></table>
+</div>
+</div><p>步骤 7：
+打开浏览器，输入 http://localhost:9100<br>
+步骤 8：<br>
+点击连接按钮没有任何相应，按 F12 发现有如下错误</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">No &#39;Access-Control-Allow-Origin&#39; header is present on the requested resource
+</code></pre></td></tr></table>
+</div>
+</div><p>这个错误是由于 elasticsearch 默认不允许跨域调用，而 elasticsearch-head 是属于前端工程，所以报错。我们这时需要修改 elasticsearch 的配置，让其允许跨域访问。<br>
+修改 elasticsearch 配置文件：elasticsearch.yml，增加以下两句命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http.cors.enabled: true
+http.cors.allow-origin: &#34;*&#34; 此步为允许 elasticsearch 跨越访问 点击连接即可看到相关信息
+</code></pre></td></tr></table>
+</div>
+</div><p><img src="/img/elasticsearch_head.png" alt="alt elasticsearch_head"></p>
+<h2 id="elasticsearch-与-mysql-数据同步">ElasticSearch 与 MySQL 数据同步</h2>
+<h2 id="什么-logstash">什么 logstash</h2>
+<p>  Logstash 是一款轻量级的日志搜集处理框架，可以方便的把分散的、多样化的日志搜集起来，
+并进行自定义的处理，然后传输到指定的位置，比如某个服务器或者文件。</p>
+<h2 id="logstash-安装与测试">logstash 安装与测试</h2>
+<p>解压，进入 bin 目录</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">logstash -e &#39;input { stdin {} } output { stdout {} } &#39;
+
+stdin，表示输入流，指从键盘输入
+stdout，表示输出流，指从显示器输出
+命令行参数: -e 执行
+--config 或 -f 配置文件，后跟参数类型可以是一个字符串的配置或全路径文件名或全路径
+路径(如：/etc/logstash.d/，logstash 会自动读取/etc/logstash.d/目录下所有*.conf 的文
+本文件，然后在自己内存里拼接成一个完整的大配置文件再去执行)
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="mysql-数据导入-elasticsearch">MySQL 数据导入 ElasticSearch</h2>
+<ol>
+<li>在 logstash-5.6.8 安装目录下创建文件夹 mysqletc （名称随意）</li>
+<li>文件夹下创建 mysql.conf （名称随意） ，内容如下：</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">input {
+jdbc {
+# mysql jdbc connection string to our backup databse
+jdbc_connection_string =&gt;
+&#34;jdbc:mysql://192.168.2.2:3306/mysqldata?characterEncoding=UTF8&#34; # the user we wish to excute our statement as
+jdbc_user =&gt; &#34;root&#34;
+jdbc_password =&gt; &#34;123456&#34; # the path to our downloaded jdbc driver
+jdbc_driver_library =&gt; &#34;F:/software_app/ten/elasticsearch-5.6.8/logstash-5.6.8/logstash-5.6.8/mysqletc/mysql-connector-java-5.1.46.jar&#34; # the name of the driver class for mysql
+jdbc_driver_class =&gt; &#34;com.mysql.jdbc.Driver&#34;
+jdbc_paging_enabled =&gt; &#34;true&#34;
+jdbc_page_size =&gt; &#34;50000&#34; #以下对应着要执行的 sql 的绝对路径。
+#statement_filepath =&gt; &#34;&#34;
+statement =&gt; &#34;select id,title,content from tb_article&#34; #定时字段 各字段含义（由左至右）分、时、天、月、年，全部为*默认含义为每分
+钟都更新（测试结果，不同的话请留言指出）
+schedule =&gt; &#34;* * * * *&#34;
+}
+}
+output {
+elasticsearch {
+#ESIP 地址与端口
+hosts =&gt; &#34;127.0.0.1:9200&#34; #ES 索引名称（自己定义的）
+index =&gt; &#34;tensquare&#34; #自增 ID 编号
+document_id =&gt; &#34;%{id}&#34; document_type =&gt; &#34;article&#34;
+}
+stdout {
+#以 JSON 格式输出
+codec =&gt; json_lines
+}
+}
+</code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>将 mysql 驱动包 mysql-connector-java-5.1.46.jar 拷贝至 D:/logstash- 5.6.8/mysqletc/ 下 。D:/logstash-5.6.8 是你的安装目录</li>
+<li>bin目录下cmd命令行下执行</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">logstash ‐f ../mysqletc/mysql.conf
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="代码实现">代码实现</h2>
+<p>entity</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 87
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 91
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 92
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">118
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">124
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">128
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">143
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">150
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">151
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 实体类
+</span><span style="color:#998;font-style:italic"> * @author Administrator
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Document</span><span style="color:#000;font-weight:bold">(</span>type <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;article&#34;</span><span style="color:#000;font-weight:bold">,</span>indexName <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tensquare&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Article</span> <span style="color:#000;font-weight:bold">implements</span> Serializable<span style="color:#000;font-weight:bold">{</span>
+
+	<span style="color:#3c5d5d;font-weight:bold">@Id</span> <span style="color:#998;font-style:italic">// 映射_id
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String id<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//ID
+</span><span style="color:#998;font-style:italic"></span>
+
+	
+	<span style="color:#000;font-weight:bold">private</span> String columnid<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//专栏ID
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String userid<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//用户ID
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String title<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//标题
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String content<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//文章正文
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String image<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//文章封面
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> java<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">util</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Date</span> createtime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//发表日期
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> java<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">util</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Date</span> updatetime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//修改日期
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String ispublic<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//是否公开
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String istop<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//是否置顶
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> Integer visits<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//浏览量
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> Integer thumbup<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//点赞数
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> Integer comment<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//评论数
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String state<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//审核状态
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String channelid<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//所属频道
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String url<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//URL
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">private</span> String type<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//类型
+</span><span style="color:#998;font-style:italic"></span>
+	
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span>String id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getColumnid</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> columnid<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setColumnid</span><span style="color:#000;font-weight:bold">(</span>String columnid<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">columnid</span> <span style="color:#000;font-weight:bold">=</span> columnid<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getUserid</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> userid<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserid</span><span style="color:#000;font-weight:bold">(</span>String userid<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userid</span> <span style="color:#000;font-weight:bold">=</span> userid<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getTitle</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> title<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setTitle</span><span style="color:#000;font-weight:bold">(</span>String title<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">title</span> <span style="color:#000;font-weight:bold">=</span> title<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getContent</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> content<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setContent</span><span style="color:#000;font-weight:bold">(</span>String content<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">content</span> <span style="color:#000;font-weight:bold">=</span> content<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getImage</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> image<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setImage</span><span style="color:#000;font-weight:bold">(</span>String image<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">image</span> <span style="color:#000;font-weight:bold">=</span> image<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> java<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">util</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Date</span> <span style="color:#900;font-weight:bold">getCreatetime</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> createtime<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCreatetime</span><span style="color:#000;font-weight:bold">(</span>java<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">util</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Date</span> createtime<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createtime</span> <span style="color:#000;font-weight:bold">=</span> createtime<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> java<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">util</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Date</span> <span style="color:#900;font-weight:bold">getUpdatetime</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> updatetime<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUpdatetime</span><span style="color:#000;font-weight:bold">(</span>java<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">util</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Date</span> updatetime<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">updatetime</span> <span style="color:#000;font-weight:bold">=</span> updatetime<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getIspublic</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> ispublic<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setIspublic</span><span style="color:#000;font-weight:bold">(</span>String ispublic<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ispublic</span> <span style="color:#000;font-weight:bold">=</span> ispublic<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getIstop</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> istop<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setIstop</span><span style="color:#000;font-weight:bold">(</span>String istop<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">istop</span> <span style="color:#000;font-weight:bold">=</span> istop<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> Integer <span style="color:#900;font-weight:bold">getVisits</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> visits<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setVisits</span><span style="color:#000;font-weight:bold">(</span>Integer visits<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">visits</span> <span style="color:#000;font-weight:bold">=</span> visits<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> Integer <span style="color:#900;font-weight:bold">getThumbup</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> thumbup<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setThumbup</span><span style="color:#000;font-weight:bold">(</span>Integer thumbup<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">thumbup</span> <span style="color:#000;font-weight:bold">=</span> thumbup<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> Integer <span style="color:#900;font-weight:bold">getComment</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> comment<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setComment</span><span style="color:#000;font-weight:bold">(</span>Integer comment<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">comment</span> <span style="color:#000;font-weight:bold">=</span> comment<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getState</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> state<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setState</span><span style="color:#000;font-weight:bold">(</span>String state<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">state</span> <span style="color:#000;font-weight:bold">=</span> state<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getChannelid</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> channelid<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setChannelid</span><span style="color:#000;font-weight:bold">(</span>String channelid<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">channelid</span> <span style="color:#000;font-weight:bold">=</span> channelid<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getUrl</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> url<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUrl</span><span style="color:#000;font-weight:bold">(</span>String url<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">url</span> <span style="color:#000;font-weight:bold">=</span> url<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>		
+		<span style="color:#000;font-weight:bold">return</span> type<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setType</span><span style="color:#000;font-weight:bold">(</span>String type<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">type</span> <span style="color:#000;font-weight:bold">=</span> type<span style="color:#000;font-weight:bold">;</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+
+	
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>dao</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 文章dao
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">ArticleDao</span> <span style="color:#000;font-weight:bold">extends</span> ElasticsearchRepository<span style="color:#000;font-weight:bold">&lt;</span>Article<span style="color:#000;font-weight:bold">,</span>String<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 文章查询
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> Page<span style="color:#000;font-weight:bold">&lt;</span>Article<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByTitleOrContentLike</span><span style="color:#000;font-weight:bold">(</span>String title<span style="color:#000;font-weight:bold">,</span> String content<span style="color:#000;font-weight:bold">,</span> Pageable pageable<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>service</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 文章service
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ArticleService</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> ArticleDao articleDao<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 文章搜素
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> Page<span style="color:#000;font-weight:bold">&lt;</span>Article<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">search</span><span style="color:#000;font-weight:bold">(</span>String keyword<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">int</span> page<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">int</span> size<span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#000;font-weight:bold">return</span> articleDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findByTitleOrContentLike</span><span style="color:#000;font-weight:bold">(</span>keyword<span style="color:#000;font-weight:bold">,</span>keyword<span style="color:#000;font-weight:bold">,</span> PageRequest<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">of</span><span style="color:#000;font-weight:bold">(</span>page<span style="color:#000;font-weight:bold">-</span>1<span style="color:#000;font-weight:bold">,</span>size<span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>Controller</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 文章controller
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/article&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#3c5d5d;font-weight:bold">@CrossOrigin</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ArticleController</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> ArticleService articleService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 文章搜索
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;/search/{keyword}/{page}/{size}&#34;</span><span style="color:#000;font-weight:bold">,</span>method <span style="color:#000;font-weight:bold">=</span> RequestMethod<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">GET</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> Result <span style="color:#900;font-weight:bold">search</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span> String keyword<span style="color:#000;font-weight:bold">,</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span> <span style="color:#458;font-weight:bold">int</span> page<span style="color:#000;font-weight:bold">,</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span> <span style="color:#458;font-weight:bold">int</span> size<span style="color:#000;font-weight:bold">){</span>
+        Page<span style="color:#000;font-weight:bold">&lt;</span>Article<span style="color:#000;font-weight:bold">&gt;</span> pageData <span style="color:#000;font-weight:bold">=</span> articleService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">search</span><span style="color:#000;font-weight:bold">(</span>keyword<span style="color:#000;font-weight:bold">,</span>page<span style="color:#000;font-weight:bold">,</span>size<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> Result<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">,</span> StatusCode<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OK</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;搜索成功&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#000;font-weight:bold">new</span> PageResult<span style="color:#000;font-weight:bold">&lt;&gt;(</span>pageData<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTotalElements</span><span style="color:#000;font-weight:bold">(),</span>pageData<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getContent</span><span style="color:#000;font-weight:bold">()));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>application.yml</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#900;font-weight:bold">server:</span>
+  port<span style="color:#000;font-weight:bold">:</span> 9007
+<span style="color:#900;font-weight:bold">spring:</span>
+  application<span style="color:#000;font-weight:bold">:</span>
+    name<span style="color:#000;font-weight:bold">:</span> search
+  data<span style="color:#000;font-weight:bold">:</span>
+    elasticsearch<span style="color:#000;font-weight:bold">:</span>
+      cluster<span style="color:#000;font-weight:bold">-</span>nodes<span style="color:#000;font-weight:bold">:</span> 192<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">168</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">2</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">2</span><span style="color:#000;font-weight:bold">:</span>9300
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="流程图">流程图</h2>
+<p><img src="/img/elasticsearch%E6%B5%81%E7%A8%8B%E5%9B%BE.png" alt="alt elasticsearch流程图"></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://jeremy95-sze.github.io/">Jeremy Sze</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/ElasticSearch/">https://jeremy95-sze.github.io/post/ElasticSearch/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/MongoDB%E6%80%BB%E7%BB%93/">MongoDB总结</a></li>
+        
+        <li><a href="/post/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8%E5%86%99%E6%8E%A5%E5%8F%A3/">微服务为什么不用写接口</a></li>
+        
+        <li><a href="/post/springdataredis%E4%B8%8EspringCache%E5%8C%BA%E5%88%AB/">springdataredis与springCache区别</a></li>
+        
+        <li><a href="/post/Docker%E6%80%BB%E7%BB%93/">Docker总结</a></li>
+        
+        <li><a href="/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/">Linux配置静态IP访问总结</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/ElasticSearch'>ElasticSearch</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://jeremy95-sze.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://jeremy95-sze.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/ElasticSearch/" title="ElasticSearch总结">ElasticSearch总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/MongoDB%E6%80%BB%E7%BB%93/" title="MongoDB总结">MongoDB总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8%E5%86%99%E6%8E%A5%E5%8F%A3/" title="微服务为什么不用写接口">微服务为什么不用写接口</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springdataredis%E4%B8%8EspringCache%E5%8C%BA%E5%88%AB/" title="springdataredis与springCache区别">springdataredis与springCache区别</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/Docker%E6%80%BB%E7%BB%93/" title="Docker总结">Docker总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/" title="Linux配置静态IP访问总结">Linux配置静态IP访问总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%80%BB%E7%BB%93/" title="分布式事务总结">分布式事务总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springboot%E6%80%BB%E7%BB%93/" title="springboot总结">springboot总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/VUE%E6%80%BB%E7%BB%93/" title="VUE总结">VUE总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/" title="springDataJPA_动态查询总结">springDataJPA_动态查询总结</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/Linux/">Linux (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/NoSql%E6%95%B0%E6%8D%AE%E5%BA%93/">NoSql数据库 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/docker/">docker (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/spring/">spring (3)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1/">事务 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/">前端框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/">搜索引擎 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/">数据层框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/">版本控制 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://jeremy95-sze.github.io/tags/ElasticSearch/">ElasticSearch</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/JPA/">JPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Linux%E9%85%8D%E7%BD%AE%E8%81%94%E7%BD%91/">Linux配置联网</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/MongoDB/">MongoDB</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/VUE/">VUE</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/docker/">docker</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/git/">git</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springCache/">springCache</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springDataJPA/">springDataJPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springboot/">springboot</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springdataredis/">springdataredis</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.cnblogs.com/Jeremy95-Sze/" title="Jeremy Sze的博客">Jeremy Sze的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://github.com/Jeremy95-Sze" title="Jeremy Sze的github">Jeremy Sze的github</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://jeremy95-sze.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://jeremy95-sze.github.io/">Jeremy Sze的博客 By Jeremy Sze</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" crossorigin="anonymous"></script>
+        <script>(function () {
+            if (!window.Diagram) return;
+            const blocks = document.querySelectorAll('pre code.language-sequence');
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                
+                const rootElement = block.parentNode;
+                const container = document.createElement('div');
+                const id = `js-sequence-diag-${i}`;
+                container.id = id;
+                container.className = 'align-center';
+                container.setAttribute("style", "overFlow-x:auto");
+                rootElement.parentNode.replaceChild(container, rootElement);
+
+                const diagram = Diagram.parse(block.childNodes[0].nodeValue);
+                diagram.drawSVG(id, window.sequenceDiagramsOptions
+                    ? window.sequenceDiagramsOptions
+                    : { theme: 'simple' });
+            }
+        })();
+        </script><script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'GA ID', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+</body>
+
+</html>

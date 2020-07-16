@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 03 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Mon, 05 Nov 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ElasticSearch总结</title>
+      <link>https://jeremy95-sze.github.io/post/ElasticSearch/</link>
+      <pubDate>Mon, 05 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/ElasticSearch/</guid>
+      <description>什么是 ElasticSearch Elasticsearch 是一个实时的分布式搜索和分析引擎。它可以帮助你用前所未有的速度去处理 大规模数据。$\color{red}{ElasticSearch 是一个基于 Lucene 的搜索服务器。}$ 它提供了一个分布式多用户能力的全文搜索引擎，基于 RESTful web 接口。Elasticsearch 是用 Java 开发的，并作为 Ap</description>
+    </item>
     
     <item>
       <title>MongoDB总结</title>
@@ -117,6 +126,15 @@
       
       <guid>https://jeremy95-sze.github.io/post/git%E6%80%BB%E7%BB%93/</guid>
       <description>git介绍 同生活中的许多伟大事件一样，Git 诞生于一个极富纷争大举创新的年代,Linux 内核开源项目有着为数众广的参与者。绝大多数的 Linux 内核维护工作都花在了提交补丁和保存归档的繁琐事务上（1991－2002年间）。 到 2002 年，Linux系统已经发展了十年了，代码库之大让Linus很难继</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://jeremy95-sze.github.io/post/ElasticSearch%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/ElasticSearch%E6%80%BB%E7%BB%93/</guid>
+      <description></description>
     </item>
     
   </channel>

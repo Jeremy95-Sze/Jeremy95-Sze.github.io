@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>搜索引擎 on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/</link>
+    <description>Recent content in 搜索引擎 on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 05 Nov 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ElasticSearch总结</title>
+      <link>https://jeremy95-sze.github.io/post/ElasticSearch/</link>
+      <pubDate>Mon, 05 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/ElasticSearch/</guid>
+      <description>什么是 ElasticSearch Elasticsearch 是一个实时的分布式搜索和分析引擎。它可以帮助你用前所未有的速度去处理 大规模数据。$\color{red}{ElasticSearch 是一个基于 Lucene 的搜索服务器。}$ 它提供了一个分布式多用户能力的全文搜索引擎，基于 RESTful web 接口。Elasticsearch 是用 Java 开发的，并作为 Ap</description>
+    </item>
+    
+  </channel>
+</rss>
