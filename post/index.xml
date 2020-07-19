@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 05 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Wed, 07 Nov 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>RabbitMQ总结</title>
+      <link>https://jeremy95-sze.github.io/post/RabbitMQ%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Wed, 07 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/RabbitMQ%E6%80%BB%E7%BB%93/</guid>
+      <description>RabbitMQ 简介 消息队列中间件简介 消息队列中间件是分布式系统中重要的组件，$\color{red}{主要解决应用耦合，异步消息，流量削锋等问 题实现高性能，高可用，可伸缩和最终一致性[架构] }$使用较多的消息队列有 ActiveMQ， RabbitMQ，ZeroMQ，Kafka，MetaMQ，R</description>
+    </item>
     
     <item>
       <title>ElasticSearch总结</title>

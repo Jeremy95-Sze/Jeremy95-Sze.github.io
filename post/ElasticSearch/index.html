@@ -161,12 +161,23 @@
         <li><a href="#head-插件安装">Head 插件安装</a></li>
       </ul>
     </li>
+    <li><a href="#ik-分词器">IK 分词器</a></li>
+    <li><a href="#ik-分词器安装">IK 分词器安装</a></li>
+    <li><a href="#ik-分词器测试">IK 分词器测试</a></li>
+    <li><a href="#自定义词库">自定义词库</a></li>
     <li><a href="#elasticsearch-与-mysql-数据同步">ElasticSearch 与 MySQL 数据同步</a></li>
     <li><a href="#什么-logstash">什么 logstash</a></li>
     <li><a href="#logstash-安装与测试">logstash 安装与测试</a></li>
     <li><a href="#mysql-数据导入-elasticsearch">MySQL 数据导入 ElasticSearch</a></li>
     <li><a href="#代码实现">代码实现</a></li>
     <li><a href="#流程图">流程图</a></li>
+    <li><a href="#elasticsearch-docker-环境下安装">ElasticSearch Docker 环境下安装</a></li>
+    <li><a href="#我们修改-demo-的-applicationyml">我们修改 demo 的 application.yml</a></li>
+    <li><a href="#拷贝配置文件到宿主机">拷贝配置文件到宿主机</a></li>
+    <li><a href="#重新执行创建容器命令">重新执行创建容器命令</a></li>
+    <li><a href="#ik-分词器安装-1">IK 分词器安装</a></li>
+    <li><a href="#head-插件安装-1">Head 插件安装</a></li>
+    <li><a href="#logstash-安装">logstash 安装</a></li>
   </ul>
 </nav>
     </div>
@@ -741,8 +752,368 @@ body:</p>
 http.cors.allow-origin: &#34;*&#34; 此步为允许 elasticsearch 跨越访问 点击连接即可看到相关信息
 </code></pre></td></tr></table>
 </div>
-</div><p><img src="/img/elasticsearch_head.png" alt="alt elasticsearch_head"></p>
-<h2 id="elasticsearch-与-mysql-数据同步">ElasticSearch 与 MySQL 数据同步</h2>
+</div><p><img src="/img/head%E5%90%AF%E5%8A%A8.png" alt="alt head启动"></p>
+<h2 id="ik-分词器">IK 分词器</h2>
+<p>我们在浏览器地址栏输入</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http://127.0.0.1:9200/_analyze?analyzer=chinese&amp;pretty=true&amp;text=我是程序员，
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<span style="color:#000080">&#34;tokens&#34;</span> : [
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;我&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">0</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">1</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;&lt;IDEOGRAPHIC&gt;&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">0</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;是&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">1</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">2</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;&lt;IDEOGRAPHIC&gt;&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">1</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;程&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">2</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">3</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;&lt;IDEOGRAPHIC&gt;&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">2</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;序&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">3</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">4</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;&lt;IDEOGRAPHIC&gt;&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">3</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;员&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">4</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">5</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;&lt;IDEOGRAPHIC&gt;&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">4</span>
+}
+]
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>  默认的中文分词是将每个字看成一个词，这显然是不符合要求的，所以我们需要安装中文分
+词器来解决这个问题。<br>
+  IK 分词是一款国人开发的相对简单的中文分词器。虽然开发者自 2012 年之后就不在维护了，
+但在工程应用中 IK 算是比较流行的一款</p>
+<h2 id="ik-分词器安装">IK 分词器安装</h2>
+<p>下载地址：https://github.com/medcl/elasticsearch-analysis-ik/releases</p>
+<ol>
+<li>先将其解压，将解压后的 elasticsearch 文件夹重命名文件夹为 ik</li>
+<li>将 ik 文件夹拷贝到 elasticsearch/plugins 目录下。</li>
+<li>重新启动，即可加载 IK 分词</li>
+</ol>
+<h2 id="ik-分词器测试">IK 分词器测试</h2>
+<p>IK 提供了两个分词算法 ik_smart 和 ik_max_word其中 ik_smart 为最少切分，ik_max_word 为最细粒度划分<br>
+我们分别来试一下</p>
+<ol>
+<li>最小切分：在浏览器地址栏输入地址<br>
+http://127.0.0.1:9200/_analyze?analyzer=ik_smart&amp;pretty=true&amp;text=我是程序员
+输出的结果为：</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<span style="color:#000080">&#34;tokens&#34;</span> : [
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;我&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">0</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">1</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_CHAR&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">0</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;是&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">1</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">2</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_CHAR&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">1</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;程序员&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">2</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">5</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_WORD&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">2</span>
+}
+]
+}
+</code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>最细切分：在浏览器地址栏输入地址<br>
+http://127.0.0.1:9200/_analyze?analyzer=ik_max_word&amp;pretty=true&amp;text=我是程序员<br>
+输出的结果为：</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<span style="color:#000080">&#34;tokens&#34;</span> : [
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;我&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">0</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">1</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_CHAR&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">0</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;是&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">1</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">2</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_CHAR&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">1</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;程序员&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">2</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">5</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_WORD&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">2</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;程序&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">2</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">4</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_WORD&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">3</span>
+},
+{
+<span style="color:#000080">&#34;token&#34;</span> : <span style="color:#d14">&#34;员&#34;</span>,
+<span style="color:#000080">&#34;start_offset&#34;</span> : <span style="color:#099">4</span>,
+<span style="color:#000080">&#34;end_offset&#34;</span> : <span style="color:#099">5</span>,
+<span style="color:#000080">&#34;type&#34;</span> : <span style="color:#d14">&#34;CN_CHAR&#34;</span>,
+<span style="color:#000080">&#34;position&#34;</span> : <span style="color:#099">4</span>
+}
+]
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="自定义词库">自定义词库</h2>
+<p>我们现在测试&quot;万众创新&rdquo;，浏览器的测试效果如下：
+http://127.0.0.1:9200/_analyze?analyzer=ik_smart&amp;pretty=true&amp;text=万众创新</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000080">&#34;tokens&#34;</span>: [
+        {
+            <span style="color:#000080">&#34;token&#34;</span>: <span style="color:#d14">&#34;万众&#34;</span>,
+            <span style="color:#000080">&#34;start_offset&#34;</span>: <span style="color:#099">0</span>,
+            <span style="color:#000080">&#34;end_offset&#34;</span>: <span style="color:#099">2</span>,
+            <span style="color:#000080">&#34;type&#34;</span>: <span style="color:#d14">&#34;CN_WORD&#34;</span>,
+            <span style="color:#000080">&#34;position&#34;</span>: <span style="color:#099">0</span>
+        },
+        {
+            <span style="color:#000080">&#34;token&#34;</span>: <span style="color:#d14">&#34;创新&#34;</span>,
+            <span style="color:#000080">&#34;start_offset&#34;</span>: <span style="color:#099">2</span>,
+            <span style="color:#000080">&#34;end_offset&#34;</span>: <span style="color:#099">4</span>,
+            <span style="color:#000080">&#34;type&#34;</span>: <span style="color:#d14">&#34;CN_WORD&#34;</span>,
+            <span style="color:#000080">&#34;position&#34;</span>: <span style="color:#099">1</span>
+        }
+    ]
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>默认的分词并没有识别“万众创新”是一个词。如果我们想让系统识别“万众创新”是一个词，需要编辑自定义词库。<br>
+步骤：</p>
+<ol>
+<li>进入 elasticsearch/plugins/ik/config 目录</li>
+<li>新建一个 my.dic 文件，编辑内容：</li>
+</ol>
+<pre><code class="language-properties" data-lang="properties">万众创新
+</code></pre><p>修改 IKAnalyzer.cfg.xml（在 ik/config 目录下）</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">&lt;properties&gt;
+&lt;comment&gt;IK Analyzer 扩展配置&lt;/comment&gt;
+&lt;!‐‐用户可以在这里配置自己的扩展字典 ‐‐&gt;
+&lt;entry key=&#34;ext_dict&#34;&gt;my.dic&lt;/entry&gt;
+&lt;!‐‐用户可以在这里配置自己的扩展停止词字典‐‐&gt;
+&lt;entry key=&#34;ext_stopwords&#34;&gt;&lt;/entry&gt;
+&lt;/properties&gt;
+</code></pre></td></tr></table>
+</div>
+</div><p>重新启动 elasticsearch,通过浏览器测试分词效果</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000080">&#34;tokens&#34;</span>: [
+        {
+            <span style="color:#000080">&#34;token&#34;</span>: <span style="color:#d14">&#34;万众创新&#34;</span>,
+            <span style="color:#000080">&#34;start_offset&#34;</span>: <span style="color:#099">0</span>,
+            <span style="color:#000080">&#34;end_offset&#34;</span>: <span style="color:#099">4</span>,
+            <span style="color:#000080">&#34;type&#34;</span>: <span style="color:#d14">&#34;CN_WORD&#34;</span>,
+            <span style="color:#000080">&#34;position&#34;</span>: <span style="color:#099">0</span>
+        }
+    ]
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="elasticsearch-与-mysql-数据同步">ElasticSearch 与 MySQL 数据同步</h2>
 <h2 id="什么-logstash">什么 logstash</h2>
 <p>  Logstash 是一款轻量级的日志搜集处理框架，可以方便的把分散的、多样化的日志搜集起来，
 并进行自定义的处理，然后传输到指定的位置，比如某个服务器或者文件。</p>
@@ -806,37 +1177,53 @@ stdout，表示输出流，指从显示器输出
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">input {
-jdbc {
-# mysql jdbc connection string to our backup databse
-jdbc_connection_string =&gt;
-&#34;jdbc:mysql://192.168.2.2:3306/mysqldata?characterEncoding=UTF8&#34; # the user we wish to excute our statement as
-jdbc_user =&gt; &#34;root&#34;
-jdbc_password =&gt; &#34;123456&#34; # the path to our downloaded jdbc driver
-jdbc_driver_library =&gt; &#34;F:/software_app/ten/elasticsearch-5.6.8/logstash-5.6.8/logstash-5.6.8/mysqletc/mysql-connector-java-5.1.46.jar&#34; # the name of the driver class for mysql
-jdbc_driver_class =&gt; &#34;com.mysql.jdbc.Driver&#34;
-jdbc_paging_enabled =&gt; &#34;true&#34;
-jdbc_page_size =&gt; &#34;50000&#34; #以下对应着要执行的 sql 的绝对路径。
-#statement_filepath =&gt; &#34;&#34;
-statement =&gt; &#34;select id,title,content from tb_article&#34; #定时字段 各字段含义（由左至右）分、时、天、月、年，全部为*默认含义为每分
-钟都更新（测试结果，不同的话请留言指出）
-schedule =&gt; &#34;* * * * *&#34;
-}
-}
-output {
-elasticsearch {
-#ESIP 地址与端口
-hosts =&gt; &#34;127.0.0.1:9200&#34; #ES 索引名称（自己定义的）
-index =&gt; &#34;tensquare&#34; #自增 ID 编号
-document_id =&gt; &#34;%{id}&#34; document_type =&gt; &#34;article&#34;
-}
-stdout {
-#以 JSON 格式输出
-codec =&gt; json_lines
-}
-}
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#a61717;background-color:#e3d2d2">input</span> {
+  <span style="color:#a61717;background-color:#e3d2d2">jdbc</span> <span style="color:#a61717;background-color:#e3d2d2">{</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#</span> <span style="color:#a61717;background-color:#e3d2d2">mysql</span> <span style="color:#a61717;background-color:#e3d2d2">jdbc</span> <span style="color:#a61717;background-color:#e3d2d2">connection</span> <span style="color:#a61717;background-color:#e3d2d2">string</span> <span style="color:#a61717;background-color:#e3d2d2">to</span> <span style="color:#a61717;background-color:#e3d2d2">our</span> <span style="color:#a61717;background-color:#e3d2d2">backup</span> <span style="color:#a61717;background-color:#e3d2d2">databse</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">jdbc_connection_string</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#000080">&#34;jdbc:mysql://192.168.2.2:3306/tensquare_article?characterEncoding=UTF8&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#</span> <span style="color:#a61717;background-color:#e3d2d2">the</span> <span style="color:#a61717;background-color:#e3d2d2">user</span> <span style="color:#a61717;background-color:#e3d2d2">we</span> <span style="color:#a61717;background-color:#e3d2d2">wish</span> <span style="color:#a61717;background-color:#e3d2d2">to</span> <span style="color:#a61717;background-color:#e3d2d2">excute</span> <span style="color:#a61717;background-color:#e3d2d2">our</span> <span style="color:#a61717;background-color:#e3d2d2">statement</span> <span style="color:#a61717;background-color:#e3d2d2">as</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">jdbc_user</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;root&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">jdbc_password</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;123456&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#</span> <span style="color:#a61717;background-color:#e3d2d2">the</span> <span style="color:#a61717;background-color:#e3d2d2">path</span> <span style="color:#a61717;background-color:#e3d2d2">to</span> <span style="color:#a61717;background-color:#e3d2d2">our</span> <span style="color:#a61717;background-color:#e3d2d2">downloaded</span> <span style="color:#a61717;background-color:#e3d2d2">jdbc</span> <span style="color:#a61717;background-color:#e3d2d2">driver</span>  
+	  <span style="color:#a61717;background-color:#e3d2d2">jdbc_driver_library</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;F:/software_app/ten/elasticsearch-5.6.8/logstash-5.6.8/logstash-5.6.8/mysqletc/mysql-connector-java-5.1.46.jar&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#</span> <span style="color:#a61717;background-color:#e3d2d2">the</span> <span style="color:#a61717;background-color:#e3d2d2">name</span> <span style="color:#a61717;background-color:#e3d2d2">of</span> <span style="color:#a61717;background-color:#e3d2d2">the</span> <span style="color:#a61717;background-color:#e3d2d2">driver</span> <span style="color:#a61717;background-color:#e3d2d2">class</span> <span style="color:#a61717;background-color:#e3d2d2">for</span> <span style="color:#a61717;background-color:#e3d2d2">mysql</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">jdbc_driver_class</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;com.mysql.jdbc.Driver&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">jdbc_paging_enabled</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;true&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">jdbc_page_size</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;50000&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#以下对应着要执行的sql的绝对路径。</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#statement_filepath</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">statement</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;select id,title,content from tb_article&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#定时字段</span> <span style="color:#a61717;background-color:#e3d2d2">各字段含义（由左至右）分、时、天、月、年，全部为*默认含义为每分钟都更新（测试结果，不同的话请留言指出）</span>
+      <span style="color:#a61717;background-color:#e3d2d2">schedule</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;* * * * *&#34;</span>
+  }
+<span style="color:#a61717;background-color:#e3d2d2">}</span>
+
+<span style="color:#a61717;background-color:#e3d2d2">output</span> {
+  <span style="color:#a61717;background-color:#e3d2d2">elasticsearch</span> <span style="color:#a61717;background-color:#e3d2d2">{</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#ESIP地址与端口</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">hosts</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#000080">&#34;127.0.0.1:9200&#34;</span> 
+	  <span style="color:#a61717;background-color:#e3d2d2">#ES索引名称（自己定义的）</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">index</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;tensquare&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">#自增ID编号</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">document_id</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;%{id}&#34;</span>
+	  <span style="color:#a61717;background-color:#e3d2d2">document_type</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#d14">&#34;article&#34;</span>
+  }
+  <span style="color:#a61717;background-color:#e3d2d2">stdout</span> {
+      <span style="color:#a61717;background-color:#e3d2d2">#以JSON格式输出</span>
+      <span style="color:#a61717;background-color:#e3d2d2">codec</span> <span style="color:#a61717;background-color:#e3d2d2">=&gt;</span> <span style="color:#a61717;background-color:#e3d2d2">json_lines</span>
+  }
+<span style="color:#a61717;background-color:#e3d2d2">}</span>
+
 </code></pre></td></tr></table>
 </div>
 </div><ol start="3">
@@ -1311,7 +1698,391 @@ codec =&gt; json_lines
 </div>
 </div><h2 id="流程图">流程图</h2>
 <p><img src="/img/elasticsearch%E6%B5%81%E7%A8%8B%E5%9B%BE.png" alt="alt elasticsearch流程图"></p>
-
+<h2 id="elasticsearch-docker-环境下安装">ElasticSearch Docker 环境下安装</h2>
+<p>下载镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull elasticsearch:5.6.8
+</code></pre></td></tr></table>
+</div>
+</div><p>创建容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run ‐di ‐‐name=tensquare_elasticsearch ‐p 9200:9200 ‐p 9300:9300 elasticsearch:5.6.8
+</code></pre></td></tr></table>
+</div>
+</div><p>浏览器输入地址： http://192.168.184.134:9200/<br>
+即可看到如下信息</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<span style="color:#000080">&#34;name&#34;</span> : <span style="color:#d14">&#34;WmBn0H‐&#34;</span>,
+<span style="color:#000080">&#34;cluster_name&#34;</span> : <span style="color:#d14">&#34;elasticsearch&#34;</span>,
+<span style="color:#000080">&#34;cluster_uuid&#34;</span> : <span style="color:#d14">&#34;2g‐VVbm9Rty7J4sksZNJEg&#34;</span>,
+<span style="color:#000080">&#34;version&#34;</span> : {
+<span style="color:#000080">&#34;number&#34;</span> : <span style="color:#d14">&#34;5.6.8&#34;</span>,
+<span style="color:#000080">&#34;build_hash&#34;</span> : <span style="color:#d14">&#34;688ecce&#34;</span>,
+<span style="color:#000080">&#34;build_date&#34;</span> : <span style="color:#d14">&#34;2018‐11‐2T16:46:30.010Z&#34;</span>,
+<span style="color:#000080">&#34;build_snapshot&#34;</span> : <span style="color:#000;font-weight:bold">false</span>,
+<span style="color:#000080">&#34;lucene_version&#34;</span> : <span style="color:#d14">&#34;6.6.1&#34;</span>
+},
+<span style="color:#000080">&#34;tagline&#34;</span> : <span style="color:#d14">&#34;You Know, for Search&#34;</span>
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="我们修改-demo-的-applicationyml">我们修改 demo 的 application.yml</h2>
+<pre><code class="language-ymml" data-lang="ymml">spring:
+data:
+elasticsearch:
+cluster‐nodes: 192.168.2.2:9300
+</code></pre><p>##运行测试程序，发现会报如下错误</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">NoNodeAvailableException[None of the configured nodes are available:
+[{#transport#‐1}{exvgJLR‐RlCNMJy‐hzKtnA}{192.168.2.2}
+{192.168.2.2:9300}]
+]
+at
+org.elasticsearch.client.transport.TransportClientNodesService.ensureNodes
+AreAvailable(TransportClientNodesService.java:347)
+at
+org.elasticsearch.client.transport.TransportClientNodesService.execute(Tra
+nsportClientNodesService.java:245)
+at
+org.elasticsearch.client.transport.TransportProxyClient.execute(TransportP
+roxyClient.java:59)
+</code></pre></td></tr></table>
+</div>
+</div><p>这是因为 elasticsearch 从 5 版本以后默认不开启远程连接，需要修改配置文件<br>
+我们进入容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker exec ‐it myElasticsearch /bin/bash
+</code></pre></td></tr></table>
+</div>
+</div><p>此时，我们看到 elasticsearch 所在的目录为/usr/share/elasticsearch ,进入 config 看到了配置文件elasticsearch.yml
+我们通过 vi 命令编辑此文件，尴尬的是容器并没有 vi 命令 ，咋办？我们需要以文件挂载
+的方式创建容器才行，这样我们就可以通过修改宿主机中的某个文件来实现对容器内配置文
+件的修改</p>
+<h2 id="拷贝配置文件到宿主机">拷贝配置文件到宿主机</h2>
+<p>首先退出容器，然后执行命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker cp myElasticsearch:/usr/share/elasticsearch/config/elasticsearch.yml /usr/share/elasticsearch.yml
+</code></pre></td></tr></table>
+</div>
+</div><p>停止和删除原来创建的容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker stop myElasticsearch
+docker rm myElasticsearch
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="重新执行创建容器命令">重新执行创建容器命令</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run ‐di ‐‐name=myElasticsearch ‐p 9200:9200 ‐p 9300:9300 ‐v /usr/share/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml elasticsearch:5.6.8
+</code></pre></td></tr></table>
+</div>
+</div><p>修改/usr/share/elasticsearch.yml 将 transport.host: 0.0.0.0 前的#去掉后
+保存文件退出。其作用是允许任何 ip 地址访问 elasticsearch .开发测试阶段可以这么做，
+生产环境下指定具体的 IP<br>
+重启启动</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker restart myElasticsearch
+</code></pre></td></tr></table>
+</div>
+</div><p>重启后发现重启启动失败了，这时什么原因呢？这与我们刚才修改的配置有关，因为
+elasticsearch 在启动的时候会进行一些检查，比如最多打开的文件的个数以及虚拟内存区
+域数量等等，如果你放开了此配置，意味着需要打开更多的文件以及虚拟内存，所以我们还
+需要系统调优。<br>
+系统调优<br>
+我们一共需要修改两处<br>
+修改/etc/security/limits.conf ，追加内容</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">* soft nofile 65536
+* hard nofile 65536
+</code></pre></td></tr></table>
+</div>
+</div><p>nofile 是单个进程允许打开的最大文件个数 soft nofile 是软限制 hard nofile 是硬限制
+修改/etc/sysctl.conf，追加内容</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">vm.max_map_count=655360
+</code></pre></td></tr></table>
+</div>
+</div><p>限制一个进程可以拥有的 VMA(虚拟内存区域)的数量
+执行下面命令 修改内核参数马上生效</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">sysctl ‐p
+</code></pre></td></tr></table>
+</div>
+</div><p>重新启动虚拟机，再次启动容器，发现已经可以启动并远程访问</p>
+<h2 id="ik-分词器安装-1">IK 分词器安装</h2>
+<p>快捷键 alt+p 进入 sftp , 将 ik 文件夹上传至宿主机</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">sftp&gt; put -r d:\setup\ik
+</code></pre></td></tr></table>
+</div>
+</div><p>在宿主机中将 ik 文件夹拷贝到容器内 /usr/share/elasticsearch/plugins 目录下。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker cp ik myElasticsearch:/usr/share/elasticsearch/plugins/
+</code></pre></td></tr></table>
+</div>
+</div><p>重新启动，即可加载 IK 分词器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker restart myElasticsearch
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="head-插件安装-1">Head 插件安装</h2>
+<p>修改/usr/share/elasticsearch.yml ,添加允许跨域配置</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">http.cors.enabled: true
+http.cors.allow‐origin: &#34;*&#34;
+</code></pre></td></tr></table>
+</div>
+</div><p>重新启动 elasticseach 容器<br>
+下载 head 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull mobz/elasticsearch-head:5
+</code></pre></td></tr></table>
+</div>
+</div><p>创建 head 容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=myhead -p 9100:9100 mobz/elasticsearch-head:5
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="logstash-安装">logstash 安装</h2>
+<p>下载 logstash 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker pull logstash
+</code></pre></td></tr></table>
+</div>
+</div><p>创建 logstash 目录</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">mkdir /usr/local/logstash
+</code></pre></td></tr></table>
+</div>
+</div><p>在 logstash 目录下建立 Dockerfile 文件，内容如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">FROM logstash
+CMD [“-f”,”/usr/local/logstash/mysql.conf”]
+FROM logstash：意思是镜像构建在 logstash 基础之上
+CMD [“-f”,”/usr/local/logstash/mysql.conf”]：代表在 docker run 运行镜像，容器内
+部启动过程中，添加参数 -f /usr/local/logstash/mysql.conf。
+</code></pre></td></tr></table>
+</div>
+</div><p>构建新的 logstash 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker build -t logstash_new . 构建后查询 logstash_new 镜像是否构建成功。
+</code></pre></td></tr></table>
+</div>
+</div><p>以目录挂载形式启动新的 logstash 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run -di --name=logstash -v /usr/local/logstash:/usr/local/logstash
+</code></pre></td></tr></table>
+</div>
+</div><p>logstash_new<br>
+把 之 前 在 window 的 mysql.conf 和 mysql 驱 动 文 件 上 传 到 宿 主 机 的
+/usr/local/logstash 目录下面 <br>
+修改 mysql.conf 内容：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">input {
+jdbc {
+# mysql jdbc connection string to our backup databse
+jdbc_connection_string =&gt;
+&#34;jdbc:mysql://192.168.22.22:3306/article?characterEncoding=UTF8&#34; # the user we wish to excute our statement as
+jdbc_user =&gt; &#34;root&#34;
+jdbc_password =&gt; &#34;123456&#34; # the path to our downloaded jdbc driver
+jdbc_driver_library =&gt; &#34;/usr/local/logstash/mysql-connector-java-5.1.46.jar&#34; # the name of the driver class for mysql
+jdbc_driver_class =&gt; &#34;com.mysql.jdbc.Driver&#34;
+jdbc_paging_enabled =&gt; &#34;true&#34;
+jdbc_page_size =&gt; &#34;50000&#34; #以下对应着要执行的 sql 的绝对路径。
+#statement_filepath =&gt; &#34;&#34;
+statement =&gt; &#34;select id,title,content from tb_article&#34; #定时字段 各字段含义（由左至右）分、时、天、月、年，全部为*默认含义为每分
+钟都更新（测试结果，不同的话请留言指出）
+schedule =&gt; &#34;* * * * *&#34;
+}
+}
+output {
+elasticsearch {
+#ESIP 地址与端口
+hosts =&gt; &#34;192.168.2.2:9200&#34; #ES 索引名称（自己定义的）
+index =&gt; &#34;articleId&#34; #自增 ID 编号
+document_id =&gt; &#34;%{id}&#34; document_type =&gt; &#34;article&#34;
+}
+stdout {
+#以 JSON 格式输出
+codec =&gt; json_lines
+}
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>重启 logstash 容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker restart logstash
+</code></pre></td></tr></table>
+</div>
+</div><p>查看 logstash 容器日志，看是否 1 分钟同步一次数据到 elasticsearch</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker logs -f --tail=30 logstash
+</code></pre></td></tr></table>
+</div>
+</div>
         </div>
 
         
@@ -1338,9 +2109,9 @@ codec =&gt; json_lines
         
         <li><a href="/post/springdataredis%E4%B8%8EspringCache%E5%8C%BA%E5%88%AB/">springdataredis与springCache区别</a></li>
         
-        <li><a href="/post/Docker%E6%80%BB%E7%BB%93/">Docker总结</a></li>
-        
         <li><a href="/post/VMware%E4%B8%ADCentOS-7%E8%AE%BE%E7%BD%AE%E5%9B%BA%E5%AE%9AIP%E5%90%8C%E6%97%B6%E8%BF%9E%E6%8E%A5%E5%86%85%E5%A4%96%E7%BD%91/">Linux配置静态IP访问总结</a></li>
+        
+        <li><a href="/post/Docker%E6%80%BB%E7%BB%93/">Docker总结</a></li>
         
     </ul>
 </div>
@@ -1399,6 +2170,10 @@ codec =&gt; json_lines
 <ul class="widget-list">
     
     <li>
+        <a href="https://jeremy95-sze.github.io/post/RabbitMQ%E6%80%BB%E7%BB%93/" title="RabbitMQ总结">RabbitMQ总结</a>
+    </li>
+    
+    <li>
         <a href="https://jeremy95-sze.github.io/post/ElasticSearch/" title="ElasticSearch总结">ElasticSearch总结</a>
     </li>
     
@@ -1434,10 +2209,6 @@ codec =&gt; json_lines
         <a href="https://jeremy95-sze.github.io/post/VUE%E6%80%BB%E7%BB%93/" title="VUE总结">VUE总结</a>
     </li>
     
-    <li>
-        <a href="https://jeremy95-sze.github.io/post/springdatajpa%E5%8A%A8%E6%80%81%E6%9F%A5%E8%AF%A2/" title="springDataJPA_动态查询总结">springDataJPA_动态查询总结</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -1465,6 +2236,8 @@ codec =&gt; json_lines
     
     <li><a href="https://jeremy95-sze.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (1)</a></li>
     
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/">消息中间件 (1)</a></li>
+    
     <li><a href="https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/">版本控制 (1)</a></li>
     
     <li><a href="https://jeremy95-sze.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
@@ -1483,6 +2256,8 @@ codec =&gt; json_lines
     <a href="https://jeremy95-sze.github.io/tags/Linux%E9%85%8D%E7%BD%AE%E8%81%94%E7%BD%91/">Linux配置联网</a>
     
     <a href="https://jeremy95-sze.github.io/tags/MongoDB/">MongoDB</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/RabbitMQ/">RabbitMQ</a>
     
     <a href="https://jeremy95-sze.github.io/tags/VUE/">VUE</a>
     

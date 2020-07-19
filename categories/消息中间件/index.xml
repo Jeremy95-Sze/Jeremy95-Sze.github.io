@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>消息中间件 on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/</link>
+    <description>Recent content in 消息中间件 on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 07 Nov 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>RabbitMQ总结</title>
+      <link>https://jeremy95-sze.github.io/post/RabbitMQ%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Wed, 07 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/RabbitMQ%E6%80%BB%E7%BB%93/</guid>
+      <description>RabbitMQ 简介 消息队列中间件简介 消息队列中间件是分布式系统中重要的组件，$\color{red}{主要解决应用耦合，异步消息，流量削锋等问 题实现高性能，高可用，可伸缩和最终一致性[架构] }$使用较多的消息队列有 ActiveMQ， RabbitMQ，ZeroMQ，Kafka，MetaMQ，R</description>
+    </item>
+    
+  </channel>
+</rss>
