@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>JWT on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/tags/JWT/</link>
+    <description>Recent content in JWT on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 09 Nov 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/tags/JWT/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>JWT总结</title>
+      <link>https://jeremy95-sze.github.io/post/JWT%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Fri, 09 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/JWT%E6%80%BB%E7%BB%93/</guid>
+      <description>BCrypt 密码加密 任何应用考虑到安全，绝不能明文的方式保存密码。密码应该通过哈希算法进行加密。 有很多标准的算法比如 SHA(微信公众号使用) 或者 MD5，结合 salt(盐)是一个不错的选择。 Spring Security 提 供了 BCryptPasswordEncoder 类,实现 Spring 的 PasswordEncoder 接口使用 BCrypt 强哈希方法 来加密密码。 BCrypt 强哈希方法 每次加密的结果都不一样。 BCrypt 密码加</description>
+    </item>
+    
+  </channel>
+</rss>
