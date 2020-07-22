@@ -6,10 +6,28 @@
     <description>Recent content in Categories on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 09 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 11 Nov 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>spring</title>
+      <link>https://jeremy95-sze.github.io/categories/spring/</link>
+      <pubDate>Sun, 11 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/categories/spring/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>SpringCloud</title>
+      <link>https://jeremy95-sze.github.io/categories/SpringCloud/</link>
+      <pubDate>Sun, 11 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/categories/SpringCloud/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>认证</title>
@@ -89,15 +107,6 @@
       <pubDate>Mon, 29 Oct 2018 08:36:54 -0700</pubDate>
       
       <guid>https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>spring</title>
-      <link>https://jeremy95-sze.github.io/categories/spring/</link>
-      <pubDate>Sat, 27 Oct 2018 08:36:54 -0700</pubDate>
-      
-      <guid>https://jeremy95-sze.github.io/categories/spring/</guid>
       <description></description>
     </item>
     

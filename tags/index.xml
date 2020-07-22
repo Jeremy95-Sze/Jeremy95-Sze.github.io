@@ -6,10 +6,28 @@
     <description>Recent content in Tags on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 09 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 11 Nov 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>SpringCloud</title>
+      <link>https://jeremy95-sze.github.io/tags/SpringCloud/</link>
+      <pubDate>Sun, 11 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/tags/SpringCloud/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>springDataJPA</title>
+      <link>https://jeremy95-sze.github.io/tags/springDataJPA/</link>
+      <pubDate>Sun, 11 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/tags/springDataJPA/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>JWT</title>
@@ -125,15 +143,6 @@
       <pubDate>Wed, 24 Oct 2018 08:36:54 -0700</pubDate>
       
       <guid>https://jeremy95-sze.github.io/tags/VUE/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>springDataJPA</title>
-      <link>https://jeremy95-sze.github.io/tags/springDataJPA/</link>
-      <pubDate>Mon, 22 Oct 2018 08:36:54 -0700</pubDate>
-      
-      <guid>https://jeremy95-sze.github.io/tags/springDataJPA/</guid>
       <description></description>
     </item>
     

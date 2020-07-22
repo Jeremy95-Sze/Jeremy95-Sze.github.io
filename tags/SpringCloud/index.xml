@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SpringCloud on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/tags/SpringCloud/</link>
+    <description>Recent content in SpringCloud on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 11 Nov 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/tags/SpringCloud/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>SpringCloud总结</title>
+      <link>https://jeremy95-sze.github.io/post/SpringCloud/</link>
+      <pubDate>Sun, 11 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/SpringCloud/</guid>
+      <description>什么是 SpringCloud Spring Cloud 是一系列框架的有序集合。它利用 Spring Boot 的开发便利性巧妙地简化了分布 式系统基础设施的开发，如服务发现注册、配置中心、消息总线、负载均衡、熔断器、数据 监控等，都可以用 Spring Boot 的开发风格做到一键启动和部署。Spring 并没有重复制造轮子， 它只是将目前各家公司开发的比较成熟、经得起实</description>
+    </item>
+    
+  </channel>
+</rss>
