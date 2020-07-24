@@ -6,17 +6,26 @@
     <description>Recent content in SpringCloud on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 11 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Mon, 12 Nov 2018 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/categories/SpringCloud/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>SpringCloud总结</title>
-      <link>https://jeremy95-sze.github.io/post/SpringCloud/</link>
+      <title>springcloud_hystrix_zuul_springcloudconfig_springcloudbus总结</title>
+      <link>https://jeremy95-sze.github.io/post/springcloud_hystrix_zuul_springcloudconfig_springcloudbus/</link>
+      <pubDate>Mon, 12 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/springcloud_hystrix_zuul_springcloudconfig_springcloudbus/</guid>
+      <description>熔断器 Hystrix 在微服务架构中通常会有多个服务层调用，基础服务的故障可能会导致级联故障，进而造成 整个系统不可用的情况，这种现象被称为服务雪崩效应。服务雪崩效应是一种因“服务提供 者”的不可用导致“服务消费者”的不可用,并将不可用逐渐放大的过程。 如果下图所示：A 作为服务提供者，B 为 A 的服务消</description>
+    </item>
+    
+    <item>
+      <title>SpringCloud_Eureka_Feign总结</title>
+      <link>https://jeremy95-sze.github.io/post/SpringCloud_Eureka_Feign/</link>
       <pubDate>Sun, 11 Nov 2018 08:36:54 -0700</pubDate>
       
-      <guid>https://jeremy95-sze.github.io/post/SpringCloud/</guid>
+      <guid>https://jeremy95-sze.github.io/post/SpringCloud_Eureka_Feign/</guid>
       <description>什么是 SpringCloud Spring Cloud 是一系列框架的有序集合。它利用 Spring Boot 的开发便利性巧妙地简化了分布 式系统基础设施的开发，如服务发现注册、配置中心、消息总线、负载均衡、熔断器、数据 监控等，都可以用 Spring Boot 的开发风格做到一键启动和部署。Spring 并没有重复制造轮子， 它只是将目前各家公司开发的比较成熟、经得起实</description>
     </item>
     
