@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jenkins on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/tags/Jenkins/</link>
+    <description>Recent content in Jenkins on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 13 Nov 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/tags/Jenkins/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结</title>
+      <link>https://jeremy95-sze.github.io/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Tue, 13 Nov 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/</guid>
+      <description>什么是 Dockerfile Dockerfile 是由一系列命令和参数构成的脚本，这些命令应用于基础镜像并最终创建一个新的镜像。 对于开发人员：可以为开发团队提供一个完全一致的开发环境； 对于测试人员：可以直接拿开发时所构建的镜像或者通过 Dockerfile 文件构建一个新的镜像开始工作了； 对于运维人员：在部署时，可以实现应用的无缝移植。 常用</description>
+    </item>
+    
+  </channel>
+</rss>

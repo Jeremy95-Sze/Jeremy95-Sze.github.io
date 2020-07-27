@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结 - Jeremy Sze的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2018-11-13T08:36:54&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2018-11-13T08:36:54&#43;08:00'>
+        
+    <meta name="Keywords" content="java,博客">
+    <meta name="description" content="Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结">
+        
+    <meta name="author" content="Jeremy Sze">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-4031353640611810",
+        enable_page_level_ads: true
+    });
+    </script>
+    
+
+
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://jeremy95-sze.github.io/">
+                        Jeremy Sze的博客
+                    </a>
+                
+                <p class="description">专注于Java、JavaScript、软件开发、web开发、分布式，微服务系统开发</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://jeremy95-sze.github.io/">首页</a>
+                    
+                    <a  href="https://jeremy95-sze.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#什么是-dockerfile">什么是 Dockerfile</a></li>
+    <li><a href="#常用命令">常用命令</a></li>
+    <li><a href="#dockerfile-构建-eureka-镜像">Dockerfile 构建 Eureka 镜像</a></li>
+    <li><a href="#dockermaven-插件自动发布-eureka">DockerMaven 插件自动发布 Eureka</a></li>
+    <li><a href="#理解持续集成">理解持续集成</a></li>
+    <li><a href="#持续集成的特点">持续集成的特点</a></li>
+    <li><a href="#持续集成的作用">持续集成的作用</a></li>
+    <li><a href="#什么是-gogs">什么是 Gogs</a></li>
+    <li><a href="#gogs-的安装与配置">Gogs 的安装与配置</a></li>
+    <li><a href="#配置">配置</a></li>
+    <li><a href="#运行-jenkins-实现持续集成">运行 Jenkins 实现持续集成</a>
+      <ul>
+        <li><a href="#jenkins-简介">Jenkins 简介</a></li>
+        <li><a href="#易安装">易安装：</a></li>
+        <li><a href="#易配置">易配置：</a></li>
+        <li><a href="#支持永久链接">支持永久链接：</a></li>
+        <li><a href="#集成-e-mailrssim">集成 E-Mail/RSS/IM：</a></li>
+        <li><a href="#junittestng-测试报告">JUnit/TestNG 测试报告：</a></li>
+        <li><a href="#支持分布式构建">支持分布式构建：</a></li>
+        <li><a href="#文件指纹信息">文件指纹信息：</a></li>
+        <li><a href="#支持第三方插件">支持第三方插件：</a></li>
+      </ul>
+    </li>
+    <li><a href="#jenkins-安装">Jenkins 安装</a></li>
+    <li><a href="#安装jdk">安装jdk</a></li>
+    <li><a href="#jenkins-安装与启动">Jenkins 安装与启动</a></li>
+    <li><a href="#安装插件">安装插件</a></li>
+    <li><a href="#jenkins忘记账号和密码操作">jenkins忘记账号和密码操作</a></li>
+    <li><a href="#全局工具配置">全局工具配置</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年11月13日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/%E9%83%A8%E7%BD%B2'>部署</a></span>
+            
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90'>持续集成</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="什么是-dockerfile">什么是 Dockerfile</h2>
+<p>Dockerfile 是由一系列命令和参数构成的脚本，这些命令应用于基础镜像并最终创建一个新的镜像。</p>
+<ol>
+<li>对于开发人员：可以为开发团队提供一个完全一致的开发环境；</li>
+<li>对于测试人员：可以直接拿开发时所构建的镜像或者通过 Dockerfile 文件构建一个新的镜像开始工作了；</li>
+<li>对于运维人员：在部署时，可以实现应用的无缝移植。</li>
+</ol>
+<h2 id="常用命令">常用命令</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">命令 						作用
+FROM image_name:tag 		定义了使用哪个基础镜像启动构建流程
+MAINTAINER	user_name		声明镜像的创建者
+ENV key value 				设置环境变量 <span style="color:#000;font-weight:bold">(</span>可以写多条<span style="color:#000;font-weight:bold">)</span>
+RUN <span style="color:#0086b3">command</span> 				是 Dockerfile 的核心部分<span style="color:#000;font-weight:bold">(</span>可以写多条<span style="color:#000;font-weight:bold">)</span>
+ADD source_dir/file 		将宿主机的文件复制到容器内，如果是一个压缩文件，
+dest_dir/file				将会在复制后自动解压
+
+COPY source_dir/file
+dest_dir/file				和 ADD 相似，但是如果有压缩文件并不能解压
+
+WORKDIR path_dir 			设置工作目录
+EXPOSE port1 prot2			用来指定端口，使容器内的应用可以通过端口和外界交互
+CMD argument				在构建容器时使用，会被 docker run 后的 argument 覆盖
+ENTRYPOINT
+argument					和 CMD 相似，但是并不会被 docker run 指定的参数覆盖
+VOLUME 						将本地文件夹或者其他容器的文件挂载到容器中
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="dockerfile-构建-eureka-镜像">Dockerfile 构建 Eureka 镜像</h2>
+<p>在需要打包的微服务项目的pom里面引入springboot打包插件</p>
+<pre><code class="language-pom" data-lang="pom">&lt;build&gt;
+&lt;finalName&gt;app&lt;/finalName&gt;
+&lt;plugins&gt;
+&lt;plugin&gt;
+&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+&lt;/plugin&gt;
+&lt;/plugins&gt;
+&lt;/build&gt;
+</code></pre><p>把需要部署的微服务，拖动到，idea的Terminal模块里边输入一下命令</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">mvn clear package
+</code></pre></td></tr></table>
+</div>
+</div><p>打包成功后会在该项目的taget文件夹中生成一个jar包
+<img src="/img/mvn%E6%89%93%E5%8C%85%E6%88%90%E5%8A%9F.png" alt="alt mvn打包成功">
+$\color{red}{注意：一定要先引入插件依赖，不然虽然构建成功，但是没把依赖也打包上去，会跑不起来}$<br>
+上传 jar 包到 linux<br>
+创建一个新目录</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">mkdir /usr/local/eureka
+</code></pre></td></tr></table>
+</div>
+</div><p>把 jar 包拷贝到/usr/local/eureka 目录下<br>
+在/usr/local/eureka 目录下创建 Dockerfile 文件</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vi Dockerfile
+</code></pre></td></tr></table>
+</div>
+</div><p>内容如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#000;font-weight:bold">FROM</span><span style="color:#d14"> jdk1.8</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">ADD</span> app.jar /app.jar EXPOSE <span style="color:#099">6868</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">ENTRYPOINT</span> [<span style="color:#a61717;background-color:#e3d2d2">“java”</span>,<span style="color:#a61717;background-color:#e3d2d2">”-jar”</span>,<span style="color:#a61717;background-color:#e3d2d2">”/app.jar”</span>]<span style="color:#a61717;background-color:#e3d2d2">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>构建 eureka 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker build -t<span style="color:#000;font-weight:bold">=</span>’eureka’ .
+</code></pre></td></tr></table>
+</div>
+</div><p>$\color{red}{注意后面点要加上，代表当前目录下}$<br>
+镜像上传至私有仓库<br>
+先标记此镜像为私有仓库的镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker tag eureka 192.168.184.133:5000/eureka
+</code></pre></td></tr></table>
+</div>
+</div><p>上传标记的镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker push 192.168.184.133:5000/eureka
+</code></pre></td></tr></table>
+</div>
+</div><p>查看远程镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">curl -X GET http://192.168.2.2:5000/v2/_catalog  |python -m json.tool
+</code></pre></td></tr></table>
+</div>
+</div><p>查看某个镜像的标签列表</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">curl -X GET http://192.168.2.2:5000/v2/eureka/tags/list |python -m json.tool
+</code></pre></td></tr></table>
+</div>
+</div><p>查看运行日志 ,在docker run之后运行</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker logs -f --tail<span style="color:#000;font-weight:bold">=</span><span style="color:#099">30</span> eureka
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="dockermaven-插件自动发布-eureka">DockerMaven 插件自动发布 Eureka</h2>
+<p>微服务部署有两种方法：<br>
+手动部署：首先基于源码打包生成 jar 包（或 war 包）,将 jar 包（或 war 包）上传至虚拟机并拷贝至 JDK 容器。<br>
+通过 Maven 插件自动部署。<br>
+对于数量众多的微服务，手动部署无疑是非常麻烦的做法，并且容易出错。所以我们这里学习如何自动部署，这也是企业实际开发中经常使用的方法。
+Maven 插件自动部署步骤：<br>
+修改宿主机的 docker 配置，让其可以远程访问</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vi /lib/systemd/system/docker.service
+</code></pre></td></tr></table>
+</div>
+</div><p>其中 ExecStart=后添加配置</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+</code></pre></td></tr></table>
+</div>
+</div><p>修改后刷新重启</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">systemctl daemon-reload
+systemctl restart docker
+docker start registry
+</code></pre></td></tr></table>
+</div>
+</div><p>在xxx_eureka 工程 pom.xml 增加配置</p>
+<pre><code class="language-pom" data-lang="pom">&lt;project&gt;
+&lt;build&gt;
+        &lt;finalName&gt;app&lt;/finalName&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+            &lt;!-- docker的maven插件，官网：
+            https://github.com/spotify/docker-maven-plugin --&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;com.spotify&lt;/groupId&gt;
+                &lt;artifactId&gt;docker-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;0.4.13&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;imageName&gt;192.168.2.2:5000/${project.artifactId}:${project.version}&lt;/imageName&gt;
+						&lt;baseImage&gt;ascdc/jdk8&lt;/baseImage&gt;
+                    &lt;entryPoint&gt;[&quot;java&quot;, &quot;-jar&quot;,&quot;/${project.build.finalName}.jar&quot;]&lt;/entryPoint&gt;
+                    &lt;resources&gt;
+                        &lt;resource&gt;
+                            &lt;targetPath&gt;/&lt;/targetPath&gt;
+                            &lt;directory&gt;${project.build.directory}
+                            &lt;/directory&gt;
+                            &lt;include&gt;${project.build.finalName}.jar&lt;/include&gt;
+                        &lt;/resource&gt;
+                    &lt;/resources&gt;
+                    &lt;dockerHost&gt;http://192.168.2.2:2375&lt;/dockerHost&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+	&lt;/project&gt;
+</code></pre><p>以上配置会自动生成 Dockerfile</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#000;font-weight:bold">FROM</span><span style="color:#d14"> jdk1.8</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">ADD</span> app.jar /<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">ENTRYPOINT</span> [<span style="color:#d14">&#34;java&#34;</span>,<span style="color:#d14">&#34;-jar&#34;</span>,<span style="color:#d14">&#34;/app.jar&#34;</span>]<span style="color:#a61717;background-color:#e3d2d2">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>在 windows 的命令提示符下，进入 tensquare_eureka 工程所在的目录，输入以下命令，进行打包和上传镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">mvn clean package docker:build -DpushImage
+</code></pre></td></tr></table>
+</div>
+</div><p>执行后，会有如下输出，代码正在上传<br>
+浏览器访问 http://192.168.2.2:5000/v2/_catalog ，输出<br>
+<img src="/img/%E4%BB%A3%E7%A0%81%E4%B8%8A%E4%BC%A0.png" alt="alt 代码上传">
+浏览器访问 http://192.168.2.2:5000/v2/_catalog ，输出</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{<span style="color:#000080">&#34;repositories&#34;</span>:[<span style="color:#d14">&#34;tensquare_eureka&#34;</span>]}
+</code></pre></td></tr></table>
+</div>
+</div><p>进入宿主机 , 查看镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker images
+</code></pre></td></tr></table>
+</div>
+</div><p>启动容器：</p>
+<h2 id="理解持续集成">理解持续集成</h2>
+<p>什么是持续集成<br>
+持续集成 Continuous integration ，简称 CI<br>
+  随着软件开发复杂度的不断提高，团队开发成员间如何更好地协同工作以确保软件开发
+的质量已经慢慢成为开发过程中不可回避的问题。尤其是近些年来，敏捷（Agile）在软件工
+程领域越来越红火，如何能再不断变化的需求中快速适应和保证软件的质量也显得尤其的重
+要。<br>
+  持续集成正是针对这一类问题的一种软件开发实践。它倡导团队开发成员必须经常集成
+他们的工作，甚至每天都可能发生多次集成。而每次的集成都是通过自动化的构建来验证，
+包括自动编译、发布和测试，从而尽快地发现集成错误，让团队能够更快的开发内聚的软件。</p>
+<h2 id="持续集成的特点">持续集成的特点</h2>
+<ol>
+<li>它是一个自动化的周期性的集成测试过程，从检出代码、编译构建、运行测试、结果记录、测试统计等都是自动完成的，无需人工干预；</li>
+<li>需要有专门的集成服务器来执行集成构建；</li>
+<li>需要有代码托管工具支持</li>
+</ol>
+<h2 id="持续集成的作用">持续集成的作用</h2>
+<ol>
+<li>保证团队开发人员提交代码的质量，减轻了软件发布时的压力；</li>
+<li>持续集成中的任何一个环节都是自动完成的，无需太多的人工干预，有利于减少重复过程以节省时间、费用和工作量；</li>
+</ol>
+<h2 id="什么是-gogs">什么是 Gogs</h2>
+<p>Gogs 是一款极易搭建的自助 Git 服务。<br>
+Gogs 的目标是打造一个最简单、最快速和最轻松的方式搭建自助 Git 服务。使用 Go 语
+言开发使得 Gogs 能够通过独立的二进制分发，并且支持 Go 语言支持的 所有平台，包
+括 Linux、Mac OS X、Windows 以及 ARM 平台。<br>
+地址：https://gitee.com/Unknown/gogs</p>
+<h2 id="gogs-的安装与配置">Gogs 的安装与配置</h2>
+<p>下载镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker pull gogs/gogs
+</code></pre></td></tr></table>
+</div>
+</div><p>创建容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run -di --name<span style="color:#000;font-weight:bold">=</span>gogs -p 10022:22 -p 3000:3000 -v /var/gogsdata:/datagogs/gogs gogs/gogs
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="配置">配置</h2>
+<p>假设我的 centos 虚拟机 IP 为 192.168.2.2 完成以下步骤<br>
+在地址栏输入  http://192.168.2.2:3000 会进入首次运行安装程序页面，我们可以选择一种数据库作为 gogs 数据的存储，最简单的是选择 SQLite3。如果对于规模较大的公司，可以选择 MySQL</p>
+<ol>
+<li>设置好数据库信息，点击安装gogs</li>
+<li>新建一个仓库</li>
+<li>连接idea
+<ul>
+<li>在本地安装 git(Windows 版本)</li>
+<li>在 IDEA 中选择菜单 : File &ndash; settings , 在窗口中选择 Version Control &ndash; Git<br>
+<img src="/img/idea%E9%85%8D%E7%BD%AEgit.png" alt="alt idea配置git"></li>
+</ul>
+</li>
+<li>将十次方代码提交到 Git
+<ul>
+<li>选择菜单 VCS &ndash;&gt; Enable Version Control Integration..</li>
+<li>选择 Git</li>
+<li>设置远程地址: 右键点击工程选择菜单 Git &ndash;&gt; Repository &ndash;&gt;Remotes&hellip; &ndash;&gt;添加git的地址</li>
+<li>右键点击工程选择菜单 Git &ndash;&gt; Add</li>
+<li>右键点击工程选择菜单 Git &ndash;&gt; Commit Directory&hellip;</li>
+<li>右键点击工程选择菜单 Git &ndash;&gt; Repository &ndash;&gt; Push &hellip;</li>
+</ul>
+</li>
+</ol>
+<h2 id="运行-jenkins-实现持续集成">运行 Jenkins 实现持续集成</h2>
+<h3 id="jenkins-简介">Jenkins 简介</h3>
+<p>  Jenkins，原名 Hudson，2011 年改为现在的名字，它 是一个开源的实现持续集成的软件工
+具。官方网站： <a href="http://jenkins-ci.org/">http://jenkins-ci.org/</a>。<br>
+  Jenkins 能实施监控集成中存在的错误，提供详细的日志文件和提醒功能，还能用图表的
+形式形象地展示项目构建的趋势和稳定性。<br>
+特点：</p>
+<h3 id="易安装">易安装：</h3>
+<p>仅仅一个 java -jar jenkins.war，从官网下载该文件后，直接运行，无需额外的安装，更无需安装数据库；</p>
+<h3 id="易配置">易配置：</h3>
+<p>提供友好的 GUI 配置界面；<br>
+变更支持：Jenkins 能从代码仓库（Subversion/CVS）中获取并产生代码更新列表并输出到编译输出信息中；</p>
+<h3 id="支持永久链接">支持永久链接：</h3>
+<p>用户是通过 web 来访问 Jenkins 的，而这些 web 页面的链接地址都是永久链接地址，因此，你可以在各种文档中直接使用该链接；</p>
+<h3 id="集成-e-mailrssim">集成 E-Mail/RSS/IM：</h3>
+<p>当完成一次集成时，可通过这些工具实时告诉你集成结果（据我所知，构建一次集成需要花费一定时间，有了这个功能，你就可以在等待结果过程中，干别的事情）；</p>
+<h3 id="junittestng-测试报告">JUnit/TestNG 测试报告：</h3>
+<p>也就是用以图表等形式提供详细的测试报表功能；</p>
+<h3 id="支持分布式构建">支持分布式构建：</h3>
+<p>Jenkins 可以把集成构建等工作分发到多台计算机中完成；</p>
+<h3 id="文件指纹信息">文件指纹信息：</h3>
+<p>Jenkins 会保存哪次集成构建产生了哪些 jars 文件，哪一次集成构建使用了哪个版本的 jars 文件等构建记录；</p>
+<h3 id="支持第三方插件">支持第三方插件：</h3>
+<p>使得 Jenkins 变得越来越强大</p>
+<h2 id="jenkins-安装">Jenkins 安装</h2>
+<h2 id="安装jdk">安装jdk</h2>
+<p>将 jdk-8u171-linux-x64.rpm 上传至服务器（虚拟机）<br>
+执行安装命令</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">rpm ‐ivh jdk‐8u171‐linux‐x64.rpm
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="jenkins-安装与启动">Jenkins 安装与启动</h2>
+<p>下载 jenkins</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">wget https://pkg.jenkins.io/redhat/jenkins-2.83-1.1.noarch.rpm
+</code></pre></td></tr></table>
+</div>
+</div><p>安装 jenkins</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">rpm -ivh jenkins-2.83-1.1.noarch.rpm
+</code></pre></td></tr></table>
+</div>
+</div><p>配置 jenkins</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vi /etc/sysconfig/jenkins
+</code></pre></td></tr></table>
+</div>
+</div><p>修改用户和端口</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">JENKINS_USER=&#34;root&#34;
+JENKINS_PORT=&#34;8888&#34;
+</code></pre></td></tr></table>
+</div>
+</div><p>启动服务</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">systemctl start jenkins
+</code></pre></td></tr></table>
+</div>
+</div><p>访问链接  http://192.168.2.2:8888<br>
+从/var/lib/jenkins/secrets/initialAdminPassword 中获取初始密码串<br>
+<img src="/img/JEKINS%E5%AF%86%E7%A0%81.png" alt="alt JEKINS密码"></p>
+<h2 id="安装插件">安装插件</h2>
+<p>![alt getting started](/img/getting started.png)<br>
+![alt getting started1](/img/getting started1.png)</p>
+<h2 id="jenkins忘记账号和密码操作">jenkins忘记账号和密码操作</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">1.编辑vim  /var/lib/jenkins/config.xml
+
+删除下述配置语句
+
+&lt;useSecurity&gt;true&lt;/useSecurity&gt;
+  &lt;authorizationStrategy class=&#34;hudson.security.FullControlOnceLoggedInAuthorizationStrategy&#34;&gt;
+    &lt;denyAnonymousReadAccess&gt;false&lt;/denyAnonymousReadAccess&gt;
+  &lt;/authorizationStrategy&gt;
+  &lt;securityRealm class=&#34;hudson.security.HudsonPrivateSecurityRealm&#34;&gt;
+    &lt;disableSignup&gt;true&lt;/disableSignup&gt;
+    &lt;enableCaptcha&gt;false&lt;/enableCaptcha&gt;
+  &lt;/securityRealm&gt;
+
+2.重新启动jenkins服务 service jenkins restart 
+
+Shutting down Jenkins                                [  OK  ]
+Starting Jenkins                                           [  OK  ]
+略微等待，发现再次访问网址，可直接进入登录后的页面
+3.设置新密码
+
+进入登录jenkins后的页面后，在左侧导航栏点击---系统管理---全局安全配置
+
+勾选--启用安全
+
+访问控制里，安全域勾选Jenkins专有用户数据库
+
+授权策略里，选择登录用户可以做任何事
+
+然后点击--保存
+
+注意!!!!!!!!!点击保存后不要直接刷新页面，不然你还是不知道密码是什么
+
+保存完成后，点击左上角---Jenkins---
+
+回到初始界面，点击--系统管理--用户管理--
+
+既可看到用户列表，点击列表中用户右侧的齿轮设置按钮，就可以设置新的密码了
+
+完成后，保存  重新访问网址，就可以刚刚设置的用户及用户密码进行登录了
+</code></pre></td></tr></table>
+</div>
+</div><p>jenkins需要安装maven插件与git插件<br>
+  配置maven仓库指定setting配置文件<br>
+Linux需要下载maven以及mave仓库和git<br>
+  执行此步是为了以后在打包的时候不必重新下载，缩短打包的时间。</p>
+<h2 id="全局工具配置">全局工具配置</h2>
+<p>指定jdk
+<img src="/img/jenkins%E9%85%8D%E7%BD%AEjdk.png" alt="alt jenkins配置jdk"><br>
+指定maven
+<img src="/img/jenkins%E9%85%8D%E7%BD%AEmaven.png" alt="alt jenkins配置maven"><br>
+手动发布 
+<img src="/img/%E6%89%8B%E5%8A%A8%E5%8F%91%E5%B8%83.png" alt="alt 手动发布"><br>
+集成发布
+<img src="/img/%E9%9B%86%E6%88%90%E9%83%A8%E7%BD%B2.png" alt="alt 集成部署"></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://jeremy95-sze.github.io/">Jeremy Sze</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/">https://jeremy95-sze.github.io/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/Docker%E6%80%BB%E7%BB%93/">Docker总结</a></li>
+        
+        <li><a href="/post/springcloud_hystrix_zuul_springcloudconfig_springcloudbus/">springcloud_hystrix_zuul_springcloudconfig_springcloudbus总结</a></li>
+        
+        <li><a href="/post/JPQL%E5%BC%80%E5%8F%91%E5%B0%8F%E6%8F%90%E7%A4%BA/">JPQL注意点</a></li>
+        
+        <li><a href="/post/SpringCloud_Eureka_Feign/">SpringCloud_Eureka_Feign总结</a></li>
+        
+        <li><a href="/post/JWT%E6%80%BB%E7%BB%93/">JWT总结</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E7%9A%84%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%83%A8%E7%BD%B2'>服务镜像的构建与部署</a></li>
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/docker'>docker</a></li>
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/gogs'>gogs</a></li>
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/Jenkins'>Jenkins</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://jeremy95-sze.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://jeremy95-sze.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/" title="Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结">Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springcloud_hystrix_zuul_springcloudconfig_springcloudbus/" title="springcloud_hystrix_zuul_springcloudconfig_springcloudbus总结">springcloud_hystrix_zuul_springcloudconfig_springcloudbus总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JPQL%E5%BC%80%E5%8F%91%E5%B0%8F%E6%8F%90%E7%A4%BA/" title="JPQL注意点">JPQL注意点</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/SpringCloud_Eureka_Feign/" title="SpringCloud_Eureka_Feign总结">SpringCloud_Eureka_Feign总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JWT%E6%80%BB%E7%BB%93/" title="JWT总结">JWT总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/RabbitMQ%E6%80%BB%E7%BB%93/" title="RabbitMQ总结">RabbitMQ总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/ElasticSearch/" title="ElasticSearch总结">ElasticSearch总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/MongoDB%E6%80%BB%E7%BB%93/" title="MongoDB总结">MongoDB总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8%E5%86%99%E6%8E%A5%E5%8F%A3/" title="微服务为什么不用写接口">微服务为什么不用写接口</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springdataredis%E4%B8%8EspringCache%E5%8C%BA%E5%88%AB/" title="springdataredis与springCache区别">springdataredis与springCache区别</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/Linux/">Linux (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/NoSql%E6%95%B0%E6%8D%AE%E5%BA%93/">NoSql数据库 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/SpringCloud/">SpringCloud (2)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/docker/">docker (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/spring/">spring (4)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1/">事务 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/">前端框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/">持续集成 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/">搜索引擎 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/">数据层框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/">消息中间件 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/">版本控制 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E8%AE%A4%E8%AF%81/">认证 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E9%83%A8%E7%BD%B2/">部署 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://jeremy95-sze.github.io/tags/ElasticSearch/">ElasticSearch</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/JPA/">JPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Jenkins/">Jenkins</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Linux%E9%85%8D%E7%BD%AE%E8%81%94%E7%BD%91/">Linux配置联网</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/MongoDB/">MongoDB</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/VUE/">VUE</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/docker/">docker</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/git/">git</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/gogs/">gogs</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/hystrix/">hystrix</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springCache/">springCache</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springDataJPA/">springDataJPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springboot/">springboot</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springcloudbus/">springcloudbus</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springcloudconfig/">springcloudconfig</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springdataredis/">springdataredis</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/zuul/">zuul</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E7%9A%84%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%83%A8%E7%BD%B2/">服务镜像的构建与部署</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.cnblogs.com/Jeremy95-Sze/" title="Jeremy Sze的博客">Jeremy Sze的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://github.com/Jeremy95-Sze" title="Jeremy Sze的github">Jeremy Sze的github</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://jeremy95-sze.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://jeremy95-sze.github.io/">Jeremy Sze的博客 By Jeremy Sze</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" crossorigin="anonymous"></script>
+        <script>(function () {
+            if (!window.Diagram) return;
+            const blocks = document.querySelectorAll('pre code.language-sequence');
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                
+                const rootElement = block.parentNode;
+                const container = document.createElement('div');
+                const id = `js-sequence-diag-${i}`;
+                container.id = id;
+                container.className = 'align-center';
+                container.setAttribute("style", "overFlow-x:auto");
+                rootElement.parentNode.replaceChild(container, rootElement);
+
+                const diagram = Diagram.parse(block.childNodes[0].nodeValue);
+                diagram.drawSVG(id, window.sequenceDiagramsOptions
+                    ? window.sequenceDiagramsOptions
+                    : { theme: 'simple' });
+            }
+        })();
+        </script><script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'GA ID', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+</body>
+
+</html>
