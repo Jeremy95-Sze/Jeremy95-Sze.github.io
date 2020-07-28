@@ -6,10 +6,19 @@
     <description>Recent content in JWT on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 09 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Wed, 20 Feb 2019 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/tags/JWT/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>JWT总结</title>
+      <link>https://jeremy95-sze.github.io/post/JWT/</link>
+      <pubDate>Wed, 20 Feb 2019 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/JWT/</guid>
+      <description>JWT 在用户注册或登录后，我们想记录用户的登录状态，或者为用户创建身份认证的凭证。我们不再使用Session认证机制，而使用Json Web Token认证机制。 什么是JWT Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑</description>
+    </item>
     
     <item>
       <title>JWT总结</title>

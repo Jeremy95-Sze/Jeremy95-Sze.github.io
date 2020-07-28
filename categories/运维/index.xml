@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>运维 on Jeremy Sze的博客</title>
+    <link>https://jeremy95-sze.github.io/categories/%E8%BF%90%E7%BB%B4/</link>
+    <description>Recent content in 运维 on Jeremy Sze的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 24 Dec 2018 08:36:54 -0700</lastBuildDate>
+    
+	<atom:link href="https://jeremy95-sze.github.io/categories/%E8%BF%90%E7%BB%B4/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Rancher_InfluxDB_CAdvisor_Grafana总结</title>
+      <link>https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/</link>
+      <pubDate>Mon, 24 Dec 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/</guid>
+      <description>容器管理工具 Rancher 什么是 Rancher Rancher 是一个开源的企业级全栈化容器部署及管理平台。Rancher 为容器提供一揽子基础 架构服务：CNI 兼容的网络服务、存储服务、主机管理、负载均衡、防护墙…… Rancher 让上述服务跨越公有云、私有云、虚拟机、物理机环境运行，真正实现一键式应用 部署和管理 https://www.cnrancher.com/ Rancher 安装 下载 Rancher 镜像 1 docker</description>
+    </item>
+    
+    <item>
+      <title>Rancher_influxDB_cAdvisor_Grafana总结</title>
+      <link>https://jeremy95-sze.github.io/post/Rancher_InfluxDB_CAdvisor_Grafana/</link>
+      <pubDate>Mon, 24 Dec 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/Rancher_InfluxDB_CAdvisor_Grafana/</guid>
+      <description>容器管理工具 Rancher 什么是 Rancher Rancher 是一个开源的企业级全栈化容器部署及管理平台。Rancher 为容器提供一揽子基础 架构服务：CNI 兼容的网络服务、存储服务、主机管理、负载均衡、防护墙…… Rancher 让上述服务跨越公有云、私有云、虚拟机、物理机环境运行，真正实现一键式应用 部署和管理 https://www.cnrancher.com/</description>
+    </item>
+    
+  </channel>
+</rss>

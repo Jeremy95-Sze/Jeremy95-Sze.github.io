@@ -6,10 +6,37 @@
     <description>Recent content in Posts on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 13 Nov 2018 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Wed, 20 Feb 2019 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>JWT总结</title>
+      <link>https://jeremy95-sze.github.io/post/JWT/</link>
+      <pubDate>Wed, 20 Feb 2019 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/JWT/</guid>
+      <description>JWT 在用户注册或登录后，我们想记录用户的登录状态，或者为用户创建身份认证的凭证。我们不再使用Session认证机制，而使用Json Web Token认证机制。 什么是JWT Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑</description>
+    </item>
+    
+    <item>
+      <title>Rancher_InfluxDB_CAdvisor_Grafana总结</title>
+      <link>https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/</link>
+      <pubDate>Mon, 24 Dec 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/</guid>
+      <description>容器管理工具 Rancher 什么是 Rancher Rancher 是一个开源的企业级全栈化容器部署及管理平台。Rancher 为容器提供一揽子基础 架构服务：CNI 兼容的网络服务、存储服务、主机管理、负载均衡、防护墙…… Rancher 让上述服务跨越公有云、私有云、虚拟机、物理机环境运行，真正实现一键式应用 部署和管理 https://www.cnrancher.com/ Rancher 安装 下载 Rancher 镜像 1 docker</description>
+    </item>
+    
+    <item>
+      <title>Rancher_influxDB_cAdvisor_Grafana总结</title>
+      <link>https://jeremy95-sze.github.io/post/Rancher_InfluxDB_CAdvisor_Grafana/</link>
+      <pubDate>Mon, 24 Dec 2018 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/Rancher_InfluxDB_CAdvisor_Grafana/</guid>
+      <description>容器管理工具 Rancher 什么是 Rancher Rancher 是一个开源的企业级全栈化容器部署及管理平台。Rancher 为容器提供一揽子基础 架构服务：CNI 兼容的网络服务、存储服务、主机管理、负载均衡、防护墙…… Rancher 让上述服务跨越公有云、私有云、虚拟机、物理机环境运行，真正实现一键式应用 部署和管理 https://www.cnrancher.com/</description>
+    </item>
     
     <item>
       <title>Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结</title>

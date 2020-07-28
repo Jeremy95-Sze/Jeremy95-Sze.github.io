@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Rancher_InfluxDB_CAdvisor_Grafana总结 | Jeremy Sze的博客</title>
+    <meta property="og:title" content="Rancher_InfluxDB_CAdvisor_Grafana总结 - Jeremy Sze的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2018-12-24T08:36:54&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2018-12-24T08:36:54&#43;08:00'>
+        
+    <meta name="Keywords" content="java,博客">
+    <meta name="description" content="Rancher_InfluxDB_CAdvisor_Grafana总结">
+        
+    <meta name="author" content="Jeremy Sze">
+    <meta property="og:url" content="https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-4031353640611810",
+        enable_page_level_ads: true
+    });
+    </script>
+    
+
+
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://jeremy95-sze.github.io/">
+                        Jeremy Sze的博客
+                    </a>
+                
+                <p class="description">专注于Java、JavaScript、软件开发、web开发、分布式，微服务系统开发</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://jeremy95-sze.github.io/">首页</a>
+                    
+                    <a  href="https://jeremy95-sze.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#容器管理工具-rancher">容器管理工具 Rancher</a>
+      <ul>
+        <li><a href="#什么是-rancher">什么是 Rancher</a></li>
+      </ul>
+    </li>
+    <li><a href="#rancher-安装">Rancher 安装</a></li>
+    <li><a href="#rancher-初始化">Rancher 初始化</a>
+      <ul>
+        <li><a href="#添加环境">添加环境</a></li>
+      </ul>
+    </li>
+    <li><a href="#influxdb">InfluxDB</a>
+      <ul>
+        <li><a href="#什么-influxdb">什么 InfluxDB</a></li>
+        <li><a href="#influxdb-安装">InfluxDB 安装</a></li>
+      </ul>
+    </li>
+    <li><a href="#influxdb-常用操作">InfluxDB 常用操作</a></li>
+    <li><a href="#cadvisor">cAdvisor</a>
+      <ul>
+        <li><a href="#什么-cadvisor">什么 cAdvisor</a></li>
+        <li><a href="#cadvisor-安装">cAdvisor 安装</a></li>
+      </ul>
+    </li>
+    <li><a href="#grafana">Grafana</a>
+      <ul>
+        <li><a href="#什么是-grafana">什么是 Grafana</a></li>
+        <li><a href="#grafana-安装">Grafana 安装</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Rancher_InfluxDB_CAdvisor_Grafana总结</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年12月24日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://jeremy95-sze.github.io/categories/%E8%BF%90%E7%BB%B4'>运维</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="容器管理工具-rancher">容器管理工具 Rancher</h2>
+<h3 id="什么是-rancher">什么是 Rancher</h3>
+<p>  Rancher 是一个开源的企业级全栈化容器部署及管理平台。Rancher 为容器提供一揽子基础
+架构服务：CNI 兼容的网络服务、存储服务、主机管理、负载均衡、防护墙……</p>
+<p>Rancher 让上述服务跨越公有云、私有云、虚拟机、物理机环境运行，真正实现一键式应用
+部署和管理</p>
+<p><a href="https://www.cnrancher.com/">https://www.cnrancher.com/</a></p>
+<h2 id="rancher-安装">Rancher 安装</h2>
+<p>下载 Rancher 镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker pull rancher/server
+</code></pre></td></tr></table>
+</div>
+</div><p>创建 Rancher 容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run -di --name<span style="color:#000;font-weight:bold">=</span>rancher --restart<span style="color:#000;font-weight:bold">=</span>always -p 9090:8080 rancher/server
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">restart 为重启策略
+	no，默认策略，在容器退出时不重启容器
+	on-failure，在容器非正常退出时（退出状态非 0），才会重启容器
+	on-failure:3，在容器非正常退出时重启容器，最多重启 3 次
+	always，在容器退出时总是重启容器
+	unless-stopped，在容器退出时总是重启容器，但是不考虑在 Docker 守护进程启动
+时就已经停止了的容器
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="rancher-初始化">Rancher 初始化</h2>
+<h3 id="添加环境">添加环境</h3>
+<p>Rancher 支持将资源分组归属到多个环境。 每个环境具有自己独立的基础架构资源及服务，并由一个或多个用户、团队或组织所管理。
+例如，您可以创建独立的“开发”、“测试”及“生产”环境以确保环境之间的安全隔离，将“开发”环境的访问权限赋予全部人员，但限制“生产”环境的访问权限给一个小的团队。</p>
+<h2 id="influxdb">InfluxDB</h2>
+<h3 id="什么-influxdb">什么 InfluxDB</h3>
+<p>  influxDB 是一个分布式时间序列数据库。cAdvisor 仅仅显示实时信息，但是不存储监视数据。
+因此，我们需要提供时序数据库用于存储 cAdvisor 组件所提供的监控信息，以便显示除实时
+信息之外的时序数据。</p>
+<h3 id="influxdb-安装">InfluxDB 安装</h3>
+<p>下载镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker pull tutum/influxdb
+</code></pre></td></tr></table>
+</div>
+</div><p>创建容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run -di -p 8083:8083 -p 8086:8086 --expose <span style="color:#099">8090</span> --expose <span style="color:#099">8099</span> --name influxsrv tutum/influxdb
+</code></pre></td></tr></table>
+</div>
+</div><p>端口概述： 8083 端口:web 访问端口 8086:数据写入端口</p>
+<h2 id="influxdb-常用操作">InfluxDB 常用操作</h2>
+<p>创建数据库</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">DATABASE</span> <span style="color:#d14">&#34;cadvisor&#34;</span> <span style="color:#a61717;background-color:#e3d2d2">回车创建数据库</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>回车创建数据库</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000;font-weight:bold">SHOW</span> DATABASES
+</code></pre></td></tr></table>
+</div>
+</div><p>创建用户并授权 <br>
+创建用户</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">USER</span> <span style="color:#d14">&#34;cadvisor&#34;</span> <span style="color:#000;font-weight:bold">WITH</span> PASSWORD <span style="color:#d14">&#39;cadvisor&#39;</span> <span style="color:#000;font-weight:bold">WITH</span> <span style="color:#000;font-weight:bold">ALL</span> <span style="color:#000;font-weight:bold">PRIVILEGES</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>查看用户</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000;font-weight:bold">SHOW</span> USRES
+</code></pre></td></tr></table>
+</div>
+</div><p>用户授权</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000;font-weight:bold">grant</span> <span style="color:#000;font-weight:bold">all</span> <span style="color:#000;font-weight:bold">privileges</span> <span style="color:#000;font-weight:bold">on</span> cadvisor <span style="color:#000;font-weight:bold">to</span> cadvisor
+<span style="color:#000;font-weight:bold">grant</span> <span style="color:#000;font-weight:bold">WRITE</span> <span style="color:#000;font-weight:bold">on</span> cadvisor <span style="color:#000;font-weight:bold">to</span> cadvisor
+<span style="color:#000;font-weight:bold">grant</span> <span style="color:#000;font-weight:bold">READ</span> <span style="color:#000;font-weight:bold">on</span> cadvisor <span style="color:#000;font-weight:bold">to</span> cadvisor
+</code></pre></td></tr></table>
+</div>
+</div><p>查询采集的数据<br>
+切换到 cadvisor 数据库，使用以下命令查看采集的数据</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000;font-weight:bold">SHOW</span> MEASUREMENTS
+</code></pre></td></tr></table>
+</div>
+</div><p>现在我们还没有数据，如果想采集系统的数据，我们需要使用 Cadvisor 软件来实现</p>
+<h2 id="cadvisor">cAdvisor</h2>
+<h3 id="什么-cadvisor">什么 cAdvisor</h3>
+<p>  Google 开源的用于监控基础设施应用的工具，它是一个强大的监控工具，不需要任何配置
+就可以通过运行在 Docker 主机上的容器来监控 Docker 容器，而且可以监控 Docker 主机。更
+多详细操作和配置选项可以查看 Github 上的 cAdvisor 项目文档。</p>
+<h3 id="cadvisor-安装">cAdvisor 安装</h3>
+<p>下载镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker pull google/cadvisor
+</code></pre></td></tr></table>
+</div>
+</div><p>创建容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw -- volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro -- publish=8080:8080 --detach=true --link influxsrv:influxsrv --name=cadvisor
+google/cadvisor -storage_driver=influxdb -storage_driver_db=cadvisor - storage_driver_host=influxsrv:8086
+</code></pre></td></tr></table>
+</div>
+</div><p>WEB 前端访问地址<br>
+http://192.168.2.2:8080/containers/<br>
+性能指标含义参照如下地址<br>
+<a href="https://blog.csdn.net/ZHANG_H_A/article/details/53097084">https://blog.csdn.net/ZHANG_H_A/article/details/53097084</a><br>
+再次查看 influxDB，发现已经有很多数据被采集进去了。</p>
+<h2 id="grafana">Grafana</h2>
+<h3 id="什么是-grafana">什么是 Grafana</h3>
+<p>  Grafana 是一个可视化面板（Dashboard），有着非常漂亮的图表和布局展示，功
+能齐全的度量仪表盘和图形编辑器。支持 Graphite、zabbix、InfluxDB、Prometheus 和 OpenTSDB
+作为数据源。Grafana 主要特性：灵活丰富的图形化选项；可以混合多种风格；支持白天和
+夜间模式；多个数据源。</p>
+<h3 id="grafana-安装">Grafana 安装</h3>
+<p>下载镜像</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker pull grafana/grafana
+</code></pre></td></tr></table>
+</div>
+</div><p>创建容器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run -d -p 3001:3000 -e <span style="color:#008080">INFLUXDB_HOST</span><span style="color:#000;font-weight:bold">=</span>influxsrv -e
+<span style="color:#008080">INFLUXDB_PORT</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">8086</span> -e <span style="color:#008080">INFLUXDB_NAME</span><span style="color:#000;font-weight:bold">=</span>cadvisor -e <span style="color:#008080">INFLUXDB_USER</span><span style="color:#000;font-weight:bold">=</span>cadvisor -e
+<span style="color:#008080">INFLUXDB_PASS</span><span style="color:#000;font-weight:bold">=</span>cadvisor --link influxsrv:influxsrv --name grafana
+grafana/grafana
+</code></pre></td></tr></table>
+</div>
+</div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://jeremy95-sze.github.io/">Jeremy Sze</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/">https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/Rancher_InfluxDB_CAdvisor_Grafana/">Rancher_influxDB_cAdvisor_Grafana总结</a></li>
+        
+        <li><a href="/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/">Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结</a></li>
+        
+        <li><a href="/post/springcloud_hystrix_zuul_springcloudconfig_springcloudbus/">springcloud_hystrix_zuul_springcloudconfig_springcloudbus总结</a></li>
+        
+        <li><a href="/post/SpringCloud_Eureka_Feign/">SpringCloud_Eureka_Feign总结</a></li>
+        
+        <li><a href="/post/JPQL%E5%BC%80%E5%8F%91%E5%B0%8F%E6%8F%90%E7%A4%BA/">JPQL注意点</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://jeremy95-sze.github.io/tags/%E8%BF%90%E7%BB%B4'>运维</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://jeremy95-sze.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://jeremy95-sze.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JWT/" title="JWT总结">JWT总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/Rancher_.influxDB_cAdvisor_Grafana/" title="Rancher_InfluxDB_CAdvisor_Grafana总结">Rancher_InfluxDB_CAdvisor_Grafana总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/Rancher_InfluxDB_CAdvisor_Grafana/" title="Rancher_influxDB_cAdvisor_Grafana总结">Rancher_influxDB_cAdvisor_Grafana总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/Dockerfile%E6%9E%84%E5%BB%BA%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E6%80%BB%E7%BB%93/" title="Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结">Dockerfile构建服务镜像_gogs搭建git_Jenkins持续集成总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/springcloud_hystrix_zuul_springcloudconfig_springcloudbus/" title="springcloud_hystrix_zuul_springcloudconfig_springcloudbus总结">springcloud_hystrix_zuul_springcloudconfig_springcloudbus总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JPQL%E5%BC%80%E5%8F%91%E5%B0%8F%E6%8F%90%E7%A4%BA/" title="JPQL注意点">JPQL注意点</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/SpringCloud_Eureka_Feign/" title="SpringCloud_Eureka_Feign总结">SpringCloud_Eureka_Feign总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/JWT%E6%80%BB%E7%BB%93/" title="JWT总结">JWT总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/RabbitMQ%E6%80%BB%E7%BB%93/" title="RabbitMQ总结">RabbitMQ总结</a>
+    </li>
+    
+    <li>
+        <a href="https://jeremy95-sze.github.io/post/ElasticSearch/" title="ElasticSearch总结">ElasticSearch总结</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/Linux/">Linux (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/NoSql%E6%95%B0%E6%8D%AE%E5%BA%93/">NoSql数据库 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/SpringCloud/">SpringCloud (2)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/docker/">docker (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/spring/">spring (4)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E4%BA%8B%E5%8A%A1/">事务 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/">前端框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/">持续集成 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/">搜索引擎 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%95%B0%E6%8D%AE%E5%B1%82%E6%A1%86%E6%9E%B6/">数据层框架 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/">消息中间件 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/">版本控制 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E8%AE%A4%E8%AF%81/">认证 (2)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E8%BF%90%E7%BB%B4/">运维 (2)</a></li>
+    
+    <li><a href="https://jeremy95-sze.github.io/categories/%E9%83%A8%E7%BD%B2/">部署 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://jeremy95-sze.github.io/tags/ElasticSearch/">ElasticSearch</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/JPA/">JPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Jenkins/">Jenkins</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/Linux%E9%85%8D%E7%BD%AE%E8%81%94%E7%BD%91/">Linux配置联网</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/MongoDB/">MongoDB</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/VUE/">VUE</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/docker/">docker</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/git/">git</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/gogs/">gogs</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/hystrix/">hystrix</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springCache/">springCache</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springDataJPA/">springDataJPA</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springboot/">springboot</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springcloudbus/">springcloudbus</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springcloudconfig/">springcloudconfig</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/springdataredis/">springdataredis</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/zuul/">zuul</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E6%9C%8D%E5%8A%A1%E9%95%9C%E5%83%8F%E7%9A%84%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%83%A8%E7%BD%B2/">服务镜像的构建与部署</a>
+    
+    <a href="https://jeremy95-sze.github.io/tags/%E8%BF%90%E7%BB%B4/">运维</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.cnblogs.com/Jeremy95-Sze/" title="Jeremy Sze的博客">Jeremy Sze的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://github.com/Jeremy95-Sze" title="Jeremy Sze的github">Jeremy Sze的github</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://jeremy95-sze.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://jeremy95-sze.github.io/">Jeremy Sze的博客 By Jeremy Sze</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" crossorigin="anonymous"></script>
+        <script>(function () {
+            if (!window.Diagram) return;
+            const blocks = document.querySelectorAll('pre code.language-sequence');
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                
+                const rootElement = block.parentNode;
+                const container = document.createElement('div');
+                const id = `js-sequence-diag-${i}`;
+                container.id = id;
+                container.className = 'align-center';
+                container.setAttribute("style", "overFlow-x:auto");
+                rootElement.parentNode.replaceChild(container, rootElement);
+
+                const diagram = Diagram.parse(block.childNodes[0].nodeValue);
+                diagram.drawSVG(id, window.sequenceDiagramsOptions
+                    ? window.sequenceDiagramsOptions
+                    : { theme: 'simple' });
+            }
+        })();
+        </script><script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'GA ID', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+</body>
+
+</html>
