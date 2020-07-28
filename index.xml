@@ -6,10 +6,19 @@
     <description>Recent content on Jeremy Sze的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 20 Feb 2019 08:36:54 -0700</lastBuildDate>
+    <lastBuildDate>Tue, 19 Mar 2019 08:36:54 -0700</lastBuildDate>
     
 	<atom:link href="https://jeremy95-sze.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>谈谈网络爬虫</title>
+      <link>https://jeremy95-sze.github.io/post/%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB/</link>
+      <pubDate>Tue, 19 Mar 2019 08:36:54 -0700</pubDate>
+      
+      <guid>https://jeremy95-sze.github.io/post/%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB/</guid>
+      <description>什么网络爬虫 在大数据时代，信息的采集是一项重要的工作，而互联网中的数据是海量的，如果单纯靠人 力进行信息采集，不仅低效繁琐，搜集的成本也会提高。如何自动高效地获取互联网中我们 感兴趣的信息并为我们所用是一个重要的问题，而爬虫技术就是为了解决这些问题而生的。 网络爬虫（Web crawle</description>
+    </item>
     
     <item>
       <title>JWT总结</title>
